@@ -1,0 +1,7 @@
+<project name="svg" url="http://github.com/jgranick/svg" license="MIT">
+    <user name="elyon"/>
+    <tag v="cpp"/>
+    <tag v="flash"/>
+    <description>Provides support for parsing and rendering SVG content</description>
+    <version name="1.00">Initial release</version>
+</project>
