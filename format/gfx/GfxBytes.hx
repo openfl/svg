@@ -67,6 +67,9 @@ class GfxBytes extends Gfx
          baseCoder = new BaseCode(haxe.io.Bytes.ofString(base64));
       #if flash
       var bytes:ByteArray = baseCoder.decodeBytes(haxe.io.Bytes.ofString(inString)).getData();
+      #elseif js
+      var bytes:ByteArray = new ByteArray();
+      bytes.writeUTF( inString );
       #else
       var bytes = ByteArray.fromBytes( baseCoder.decodeBytes(haxe.io.Bytes.ofString(inString)) );
       #end
