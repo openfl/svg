@@ -10,7 +10,7 @@ class SVG2Gfx
 
    public function new (inXml:Xml)
    {
-      renderer = new SvgRenderer(new Svg(inXml) );
+      renderer = new SVGRenderer(new SVGData(inXml));
    }
 
    public function CreateShape()
