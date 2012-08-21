@@ -11,12 +11,12 @@ import format.svg.SVGRenderer;
 class SVG {
 	
 	
-	private var svgData:SVGData;
+	public var data:SVGData;
 	
 	
-	public function new (data:String) {
+	public function new (content:String) {
 		
-		svgData = new SVGData (Xml.parse (data));
+		data = new SVGData (Xml.parse (content));
 		
 	}
 	
@@ -29,11 +29,11 @@ class SVG {
 		
 		if (width > -1 && height > -1) {
 			
-			matrix.scale (width / svgData.width, height / svgData.height);
+			matrix.scale (width / data.width, height / data.height);
 			
 		}
 		
-		var renderer = new SVGRenderer (svgData);
+		var renderer = new SVGRenderer (data);
 		renderer.render (graphics, matrix);
 		
 	}

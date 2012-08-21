@@ -3,5 +3,5 @@
     <tag v="cpp"/>
     <tag v="flash"/>
     <description>Provides support for parsing and rendering SVG content</description>
-    <version name="1.00">Initial release</version>
+    <version name="1.01">HTML5 fix</version>
 </project>
