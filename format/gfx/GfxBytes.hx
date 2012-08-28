@@ -44,6 +44,9 @@ class GfxBytes extends Gfx
 
    public function toString() : String
    {
+ 	  #if js
+ 	  return "";
+ 	  #else
       #if flash
       var buf = new ByteArray();
       buf.length = buffer.length;
@@ -60,6 +63,7 @@ class GfxBytes extends Gfx
       #else
       return baseCoder.encodeBytes(buf).toString();
       #end
+      #end
    }
    public static function fromString(inString:String) : GfxBytes
    {
@@ -73,7 +77,9 @@ class GfxBytes extends Gfx
       #else
       var bytes = ByteArray.fromBytes( baseCoder.decodeBytes(haxe.io.Bytes.ofString(inString)) );
       #end
+      #if !js
       bytes.uncompress();
+      #end
       return new GfxBytes(bytes);
    }
 
