@@ -121,7 +121,7 @@ class SVGRenderer
                 grad.updateMatrix(m);
                 mGfx.beginGradientFill(grad);
              case FillSolid(colour):
-                mGfx.beginFill(colour,inPath.fill_alpha);
+                mGfx.beginFill(colour,inPath.fill_alpha*inPath.alpha);
              case FillNone:
                 //mGfx.endFill();
           }
@@ -136,7 +136,7 @@ class SVGRenderer
              var style = new format.gfx.LineStyle();
              var scale = Math.sqrt(m.a*m.a + m.c*m.c);
              style.thickness = inPath.stroke_width*scale;
-             style.alpha = inPath.stroke_alpha;
+             style.alpha = inPath.stroke_alpha*inPath.alpha;
              style.color = inPath.stroke_colour;
              style.capsStyle = inPath.stroke_caps;
              style.jointStyle = inPath.joint_style;
