@@ -472,6 +472,14 @@ class SVGData extends Group {
 				
 				g.children.push (DisplayText (loadText (el, matrix, styles)));
 				
+			} else if (name == "linearGradient") {
+				
+				loadGradient (el, GradientType.LINEAR, true);
+				
+			} else if (name == "radialGradient") {
+				
+				loadGradient (el, GradientType.RADIAL, true);
+				
 			} else {
 				
 				// throw("Unknown child : " + el.nodeName );
