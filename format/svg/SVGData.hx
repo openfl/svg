@@ -450,7 +450,11 @@ class SVGData extends Group {
 				
 			} else if (name == "g") {
 				
-				g.children.push (DisplayGroup (loadGroup (new Group (), el, matrix, styles)));
+				if (!(el.exists("display") && el.get("display") == "none")) {
+				
+					g.children.push (DisplayGroup (loadGroup (new Group (), el, matrix, styles)));
+					
+				}
 				
 			} else if (name == "path") {
 				
