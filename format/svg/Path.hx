@@ -18,6 +18,7 @@ class Path
    public var name:String;
    public var font_size:Float;
    public var fill:FillType;
+   public var alpha:Float;
    public var fill_alpha:Float;
    public var stroke_alpha:Float;
    public var stroke_colour:Null<Int>;

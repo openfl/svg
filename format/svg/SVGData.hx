@@ -511,8 +511,9 @@ class SVGData extends Group {
 		var path = new Path ();
 		
 		path.fill = getFillStyle ("fill", inPath, styles);
+		path.alpha = getFloatStyle ("opacity", inPath, styles, 1.0);
 		path.fill_alpha = getFloatStyle ("fill-opacity", inPath, styles, 1.0);
-		path.stroke_alpha = getFloatStyle ("stroke-opacity", inPath,styles, 1.0);
+		path.stroke_alpha = getFloatStyle ("stroke-opacity", inPath, styles, 1.0);
 		path.stroke_colour = getStrokeStyle ("stroke", inPath, styles, null);
 		path.stroke_width = getFloatStyle ("stroke-width", inPath, styles, 1.0);
 		path.stroke_caps = CapsStyle.ROUND;
