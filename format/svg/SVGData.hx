@@ -450,7 +450,11 @@ class SVGData extends Group {
 				
 			} else if (name == "g") {
 				
-				g.children.push (DisplayGroup (loadGroup (new Group (), el, matrix, styles)));
+				if (!(el.exists("display") && el.get("display") == "none")) {
+				
+					g.children.push (DisplayGroup (loadGroup (new Group (), el, matrix, styles)));
+					
+				}
 				
 			} else if (name == "path") {
 				
@@ -471,6 +475,14 @@ class SVGData extends Group {
 			} else if (name == "text") {
 				
 				g.children.push (DisplayText (loadText (el, matrix, styles)));
+				
+			} else if (name == "linearGradient") {
+				
+				loadGradient (el, GradientType.LINEAR, true);
+				
+			} else if (name == "radialGradient") {
+				
+				loadGradient (el, GradientType.RADIAL, true);
 				
 			} else {
 				
@@ -499,8 +511,9 @@ class SVGData extends Group {
 		var path = new Path ();
 		
 		path.fill = getFillStyle ("fill", inPath, styles);
+		path.alpha = getFloatStyle ("opacity", inPath, styles, 1.0);
 		path.fill_alpha = getFloatStyle ("fill-opacity", inPath, styles, 1.0);
-		path.stroke_alpha = getFloatStyle ("stroke-opacity", inPath,styles, 1.0);
+		path.stroke_alpha = getFloatStyle ("stroke-opacity", inPath, styles, 1.0);
 		path.stroke_colour = getStrokeStyle ("stroke", inPath, styles, null);
 		path.stroke_width = getFloatStyle ("stroke-width", inPath, styles, 1.0);
 		path.stroke_caps = CapsStyle.ROUND;
