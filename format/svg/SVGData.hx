@@ -456,7 +456,7 @@ class SVGData extends Group {
 					
 				}
 				
-			} else if (name == "path") {
+			} else if (name == "path" || name == "line" || name == "polyline") {
 				
 				g.children.push (DisplayPath (loadPath (el, matrix, styles, false, false)));
 				
@@ -590,7 +590,9 @@ class SVGData extends Group {
 			
 		} else {
 			
-			var d = inPath.exists ("points") ? ("M" + inPath.get ("points") + "z") : inPath.get ("d");
+			var d = inPath.exists ("points") ? ("M" + inPath.get ("points") + "z") : 
+					inPath.exists ("x1") ? ("M" + inPath.get ("x1") + "," + inPath.get ("y1") + " " + inPath.get ("x2") + "," + inPath.get ("y2") + "z") : 
+					inPath.get ("d");
 			
 			for (segment in mPathParser.parse (d, mConvertCubics)) {
 				
