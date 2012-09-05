@@ -25,9 +25,9 @@ class SVGData extends Group {
 	private static var TAN22:Float = 0.4142135623730950488016887242097;
 	private static var mStyleSplit = ~/;/g;
 	private static var mStyleValue = ~/\s*(.*)\s*:\s*(.*)\s*/;
-	private static var mTranslateMatch = ~/translate\((.*),(.*)\)/;
+	private static var mTranslateMatch = ~/translate\((.*)[, ](.*)\)/;
 	private static var mScaleMatch = ~/scale\((.*)\)/;
-	private static var mMatrixMatch = ~/matrix\((.*),(.*),(.*),(.*),(.*),(.*)\)/;
+	private static var mMatrixMatch = ~/matrix\((.*)[, ](.*)[, ](.*)[, ](.*)[, ](.*)[, ](.*)\)/;
 	private static var mURLMatch = ~/url\(#(.*)\)/;
 	private static var defaultFill = FillSolid(0x000000);
 	
