@@ -472,6 +472,10 @@ class SVGData extends Group {
 				
 				g.children.push (DisplayPath (loadPath (el, matrix, styles, false, true)));
 				
+			} else if (name == "circle") {
+				
+				g.children.push (DisplayPath (loadPath (el, matrix, styles, false, true, true)));
+				
 			} else if (name == "text") {
 				
 				g.children.push (DisplayText (loadText (el, matrix, styles)));
@@ -497,7 +501,7 @@ class SVGData extends Group {
 	}
 	
 	
-	public function loadPath (inPath:Xml, matrix:Matrix, inStyles:Hash<String>, inIsRect:Bool, inIsEllipse:Bool):Path {
+	public function loadPath (inPath:Xml, matrix:Matrix, inStyles:Hash<String>, inIsRect:Bool, inIsEllipse:Bool, inIsCircle:Bool=false):Path {
 		
 		if (inPath.exists ("transform")) {
 			
@@ -566,10 +570,11 @@ class SVGData extends Group {
 			
 			var x = inPath.exists ("cx") ? Std.parseFloat (inPath.get ("cx")) : 0;
 			var y = inPath.exists ("cy") ? Std.parseFloat (inPath.get ("cy")) : 0;
-			var w = inPath.exists ("rx") ? Std.parseFloat (inPath.get ("rx")) : 0.0;
+			var r = inIsCircle && inPath.exists ("r") ? Std.parseFloat (inPath.get ("r")) : 0.0; 
+			var w = inIsCircle ? r : inPath.exists ("rx") ? Std.parseFloat (inPath.get ("rx")) : 0.0;
 			var w_ = w * SIN45;
 			var cw_ = w * TAN22;
-			var h = inPath.exists ("ry") ? Std.parseFloat (inPath.get ("ry")) : 0.0;
+			var h = inIsCircle ? r : inPath.exists ("ry") ? Std.parseFloat (inPath.get ("ry")) : 0.0;
 			var h_ = h * SIN45;
 			var ch_ = h * TAN22;
 			
