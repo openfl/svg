@@ -25,9 +25,9 @@ class SVGData extends Group {
 	private static var TAN22:Float = 0.4142135623730950488016887242097;
 	private static var mStyleSplit = ~/;/g;
 	private static var mStyleValue = ~/\s*(.*)\s*:\s*(.*)\s*/;
-	private static var mTranslateMatch = ~/translate\((.*),(.*)\)/;
+	private static var mTranslateMatch = ~/translate\((.*)[, ](.*)\)/;
 	private static var mScaleMatch = ~/scale\((.*)\)/;
-	private static var mMatrixMatch = ~/matrix\((.*),(.*),(.*),(.*),(.*),(.*)\)/;
+	private static var mMatrixMatch = ~/matrix\((.*)[, ](.*)[, ](.*)[, ](.*)[, ](.*)[, ](.*)\)/;
 	private static var mURLMatch = ~/url\(#(.*)\)/;
 	private static var defaultFill = FillSolid(0x000000);
 	
@@ -456,7 +456,7 @@ class SVGData extends Group {
 					
 				}
 				
-			} else if (name == "path") {
+			} else if (name == "path" || name == "line" || name == "polyline") {
 				
 				g.children.push (DisplayPath (loadPath (el, matrix, styles, false, false)));
 				
@@ -471,6 +471,10 @@ class SVGData extends Group {
 			} else if (name == "ellipse") {
 				
 				g.children.push (DisplayPath (loadPath (el, matrix, styles, false, true)));
+				
+			} else if (name == "circle") {
+				
+				g.children.push (DisplayPath (loadPath (el, matrix, styles, false, true, true)));
 				
 			} else if (name == "text") {
 				
@@ -497,7 +501,7 @@ class SVGData extends Group {
 	}
 	
 	
-	public function loadPath (inPath:Xml, matrix:Matrix, inStyles:Hash<String>, inIsRect:Bool, inIsEllipse:Bool):Path {
+	public function loadPath (inPath:Xml, matrix:Matrix, inStyles:Hash<String>, inIsRect:Bool, inIsEllipse:Bool, inIsCircle:Bool=false):Path {
 		
 		if (inPath.exists ("transform")) {
 			
@@ -566,10 +570,11 @@ class SVGData extends Group {
 			
 			var x = inPath.exists ("cx") ? Std.parseFloat (inPath.get ("cx")) : 0;
 			var y = inPath.exists ("cy") ? Std.parseFloat (inPath.get ("cy")) : 0;
-			var w = inPath.exists ("rx") ? Std.parseFloat (inPath.get ("rx")) : 0.0;
+			var r = inIsCircle && inPath.exists ("r") ? Std.parseFloat (inPath.get ("r")) : 0.0; 
+			var w = inIsCircle ? r : inPath.exists ("rx") ? Std.parseFloat (inPath.get ("rx")) : 0.0;
 			var w_ = w * SIN45;
 			var cw_ = w * TAN22;
-			var h = inPath.exists ("ry") ? Std.parseFloat (inPath.get ("ry")) : 0.0;
+			var h = inIsCircle ? r : inPath.exists ("ry") ? Std.parseFloat (inPath.get ("ry")) : 0.0;
 			var h_ = h * SIN45;
 			var ch_ = h * TAN22;
 			
@@ -585,7 +590,9 @@ class SVGData extends Group {
 			
 		} else {
 			
-			var d = inPath.exists ("points") ? ("M" + inPath.get ("points") + "z") : inPath.get ("d");
+			var d = inPath.exists ("points") ? ("M" + inPath.get ("points") + "z") : 
+					inPath.exists ("x1") ? ("M" + inPath.get ("x1") + "," + inPath.get ("y1") + " " + inPath.get ("x2") + "," + inPath.get ("y2") + "z") : 
+					inPath.get ("d");
 			
 			for (segment in mPathParser.parse (d, mConvertCubics)) {
 				
