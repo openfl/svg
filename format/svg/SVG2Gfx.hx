@@ -6,7 +6,7 @@ import Xml;
 
 class SVG2Gfx
 {
-   var renderer : SvgRenderer;
+   var renderer : SVGRenderer;
 
    public function new (inXml:Xml)
    {
