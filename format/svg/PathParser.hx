@@ -15,26 +15,26 @@ class PathParser {
     
     static var sCommandArgs:Array<Int>;
 
-    static var MOVE  = "M".charCodeAt(0);
-    static var MOVER = "m".charCodeAt(0);
-    static var LINE  = "L".charCodeAt(0);
-    static var LINER = "l".charCodeAt(0);
-    static var HLINE = "H".charCodeAt(0);
-    static var HLINER = "h".charCodeAt(0);
-    static var VLINE = "V".charCodeAt(0);
-    static var VLINER = "v".charCodeAt(0);
-    static var CUBIC = "C".charCodeAt(0);
-    static var CUBICR = "c".charCodeAt(0);
-    static var SCUBIC = "S".charCodeAt(0);
-    static var SCUBICR = "s".charCodeAt(0);
-    static var QUAD = "Q".charCodeAt(0);
-    static var QUADR = "q".charCodeAt(0);
-    static var SQUAD = "T".charCodeAt(0);
-    static var SQUADR = "t".charCodeAt(0);
-    static var ARC = "A".charCodeAt(0);
-    static var ARCR = "a".charCodeAt(0);
-    static var CLOSE = "Z".charCodeAt(0);
-    static var CLOSER = "z".charCodeAt(0);
+    static inline var MOVE  = 77; //"M".charCodeAt(0);
+    static inline var MOVER = 109; //"m".charCodeAt(0);
+    static inline var LINE  = 76; // "L".charCodeAt(0);
+    static inline var LINER = 108; // "l".charCodeAt(0);
+    static inline var HLINE = 72; // "H".charCodeAt(0);
+    static inline var HLINER = 104; // "h".charCodeAt(0);
+    static inline var VLINE = 86; // "V".charCodeAt(0);
+    static inline var VLINER = 118; // "v".charCodeAt(0);
+    static inline var CUBIC = 67; // "C".charCodeAt(0);
+    static inline var CUBICR = 99; // "c".charCodeAt(0);
+    static inline var SCUBIC = 83; // "S".charCodeAt(0);
+    static inline var SCUBICR = 115; // "s".charCodeAt(0);
+    static inline var QUAD = 81; // "Q".charCodeAt(0);
+    static inline var QUADR = 113; // "q".charCodeAt(0);
+    static inline var SQUAD = 84; // "T".charCodeAt(0);
+    static inline var SQUADR = 116; // "t".charCodeAt(0);
+    static inline var ARC = 65; // "A".charCodeAt(0);
+    static inline var ARCR = 97; // "a".charCodeAt(0);
+    static inline var CLOSE = 90; // "Z".charCodeAt(0);
+    static inline var CLOSER = 122; // "z".charCodeAt(0);
 
     static var UNKNOWN = -1;
     static var SEPARATOR = -2;
