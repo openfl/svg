@@ -4,5 +4,5 @@
     <tag v="cpp"/>
     <tag v="flash"/>
     <description>Provides support for parsing and rendering SVG content</description>
-    <version name="1.03">More feature support, Haxe 3 compatibility fixes</version>
+    <version name="1.04">Haxe 3 compile fix</version>
 </project>
