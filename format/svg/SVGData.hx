@@ -17,6 +17,12 @@ import format.svg.Path;
 import format.svg.SVGRenderer;
 import format.svg.Text;
 
+#if haxe3
+import haxe.ds.StringMap;
+#else
+typedef StringMap<T> = Hash<T>;
+#end
+
 
 class SVGData extends Group {
 	
@@ -137,7 +143,7 @@ class SVGData extends Group {
 	}
 	
 	
-	private function getColorStyle (inKey:String, inNode:Xml, inStyles:Hash <String>, inDefault:Int) {
+	private function getColorStyle (inKey:String, inNode:Xml, inStyles:StringMap <String>, inDefault:Int) {
 		
 		var s = getStyle (inKey, inNode, inStyles, "");
 		
@@ -158,7 +164,7 @@ class SVGData extends Group {
 	}
 	
 	
-	private function getFillStyle (inKey:String, inNode:Xml, inStyles:Hash<String>) {
+	private function getFillStyle (inKey:String, inNode:Xml, inStyles:StringMap<String>) {
 		
 		var s = getStyle (inKey, inNode, inStyles, "");
 		
@@ -211,7 +217,7 @@ class SVGData extends Group {
 	}
 	
 	
-	private function getFloatStyle (inKey:String, inNode:Xml, inStyles:Hash<String>, inDefault:Float) {
+	private function getFloatStyle (inKey:String, inNode:Xml, inStyles:StringMap<String>, inDefault:Float) {
 		
 		var s = getStyle (inKey, inNode, inStyles, "");
 		
@@ -226,7 +232,7 @@ class SVGData extends Group {
 	}
 	
 
-	private function getStrokeStyle (inKey:String, inNode:Xml, inStyles:Hash <String>, inDefault:Null<Int>) {
+	private function getStrokeStyle (inKey:String, inNode:Xml, inStyles:StringMap <String>, inDefault:Null<Int>) {
 		
 		var s = getStyle (inKey, inNode, inStyles, "");
 		
@@ -253,7 +259,7 @@ class SVGData extends Group {
 	}
 	
 	
-	private function getStyle (inKey:String, inNode:Xml, inStyles:Hash <String>, inDefault:String) {
+	private function getStyle (inKey:String, inNode:Xml, inStyles:StringMap <String>, inDefault:String) {
 		
 		if (inNode != null && inNode.exists (inKey)) {
 			
@@ -272,12 +278,12 @@ class SVGData extends Group {
 	}
 	
 	
-	private function getStyles (inNode:Xml, inPrevStyles:Hash<String>):Hash <String> {
+	private function getStyles (inNode:Xml, inPrevStyles:StringMap<String>):StringMap <String> {
 		
 		if (!inNode.exists ("style"))
 			return inPrevStyles;
 
-		var styles = new Hash <String> ();
+		var styles = new StringMap <String> ();
 		
 		if (inPrevStyles != null) {
 			
@@ -413,7 +419,7 @@ class SVGData extends Group {
 	}
 	
 	
-	public function loadGroup (g:Group, inG:Xml, matrix:Matrix, inStyles:Hash <String>):Group {
+	public function loadGroup (g:Group, inG:Xml, matrix:Matrix, inStyles:StringMap <String>):Group {
 		
 		if (inG.exists ("transform")) {
 			
@@ -501,7 +507,7 @@ class SVGData extends Group {
 	}
 	
 	
-	public function loadPath (inPath:Xml, matrix:Matrix, inStyles:Hash<String>, inIsRect:Bool, inIsEllipse:Bool, inIsCircle:Bool=false):Path {
+	public function loadPath (inPath:Xml, matrix:Matrix, inStyles:StringMap<String>, inIsRect:Bool, inIsEllipse:Bool, inIsCircle:Bool=false):Path {
 		
 		if (inPath.exists ("transform")) {
 			
@@ -607,7 +613,7 @@ class SVGData extends Group {
 	}
 	
 	
-	public function loadText (inText:Xml, matrix:Matrix, inStyles:Hash <String>):Text {
+	public function loadText (inText:Xml, matrix:Matrix, inStyles:StringMap <String>):Text {
 		
 		if (inText.exists ("transform")) {
 			
