@@ -312,7 +312,7 @@ class SVGRenderer
        var w = Std.int(Math.ceil( inRect==null ? width : inRect.width*inScale ));
        var h = Std.int(Math.ceil( inRect==null ? width : inRect.height*inScale ));
 
-       var bmp = new flash.display.BitmapData(w,h,true,#if neko { a: 0x00, rgb: 0x000000 } #else 0x00000000 #end);
+       var bmp = new flash.display.BitmapData(w,h,true,#if (neko && !haxe3) { a: 0x00, rgb: 0x000000 } #else 0x00000000 #end);
 
        var shape = new flash.display.Shape();
        mGfx = new format.gfx.GfxGraphics(shape.graphics);
