@@ -4,5 +4,5 @@
     <tag v="cpp"/>
     <tag v="flash"/>
     <description>Provides support for parsing and rendering SVG content</description>
-    <version name="1.05">More Haxe 3 compile fixes</version>
+    <version name="1.06">Update for Neko 2</version>
 </project>
