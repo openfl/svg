@@ -456,7 +456,30 @@ class SVGData extends Group {
 		}
 		
 		var styles = getStyles (inG, inStyles);
-		
+
+		/*
+		supports eg:
+		<g>
+			<g opacity="0.5">
+				<path ... />
+				<polygon ... />
+			</g>
+		</g>
+		*/
+		if (inG.exists("opacity")) {
+
+			var opacity = inG.get("opacity");
+
+			if (styles == null)
+				styles = new StringMap<String>();
+
+			if (styles.exists("opacity"))
+				opacity = Std.string( Std.parseFloat(opacity) * Std.parseFloat(styles.get("opacity")) );
+			
+			styles.set("opacity", opacity);
+
+		}
+
 		for (el in inG.elements ()) {
 			
 			var name = el.nodeName;
