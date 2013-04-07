@@ -36,12 +36,12 @@ class PathParser {
     static inline var CLOSE = "Z".code;
     static inline var CLOSER = "z".code;
 
-    static var UNKNOWN = -1;
-    static var SEPARATOR = -2;
-    static var FLOAT = -3;
-    static var FLOAT_SIGN = -4;
-    static var FLOAT_DOT = -5;
-    static var FLOAT_EXP = -6;
+    static inline var UNKNOWN = -1;
+    static inline var SEPARATOR = -2;
+    static inline var FLOAT = -3;
+    static inline var FLOAT_SIGN = -4;
+    static inline var FLOAT_DOT = -5;
+    static inline var FLOAT_EXP = -6;
 
 
 

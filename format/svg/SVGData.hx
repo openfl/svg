@@ -27,8 +27,8 @@ typedef StringMap<T> = Hash<T>;
 class SVGData extends Group {
 	
 	
-	private static var SIN45:Float = 0.70710678118654752440084436210485;
-	private static var TAN22:Float = 0.4142135623730950488016887242097;
+	private static inline var SIN45:Float = 0.70710678118654752440084436210485;
+	private static inline var TAN22:Float = 0.4142135623730950488016887242097;
 	private static var mStyleSplit = ~/;/g;
 	private static var mStyleValue = ~/\s*(.*)\s*:\s*(.*)\s*/;
 	private static var mTranslateMatch = ~/translate\((.*)[, ](.*)\)/;
