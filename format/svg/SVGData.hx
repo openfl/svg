@@ -68,8 +68,25 @@ class SVGData extends Group {
 		else if (height == 0)
 			height = width;
 
-		loadGroup(this, svg, new Matrix (), null);
+		var viewBox = new Rectangle(0, 0, width, height);
+
+		if (svg.exists("viewBox")) {
+
+			var vbox = svg.get("viewBox");
+			var params = vbox.indexOf(",") != -1 ? vbox.split(",") : vbox.split(" ");
+			viewBox = new Rectangle( trimToFloat(params[0]), trimToFloat(params[1]), trimToFloat(params[2]), trimToFloat(params[3]) );
+
+		}
+
+		loadGroup(this, svg, new Matrix (1, 0, 0, 1, -viewBox.x, -viewBox.y), null);
 		
+	}
+
+
+	inline function trimToFloat (value:String) {
+
+		return Std.parseFloat( StringTools.trim(value) );
+
 	}
 	
 	
