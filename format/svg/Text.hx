@@ -12,6 +12,7 @@ class Text
    public var y:Float;
    public var matrix:Matrix;
    public var text:String;
+   public var textValue:String;
    public var fill:FillType;
    public var fill_alpha:Float;
    public var stroke_alpha:Float;
