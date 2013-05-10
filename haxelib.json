@@ -1,0 +1,11 @@
+{
+  "name": "svg",
+  "url": "http://github.com/haxenme/svg",
+  "license": "MIT",
+  "tags": [ "cpp", "flash" ],
+  "description": "Provides support for parsing and rendering SVG content",
+  "version": "1.0.7",
+  "releasenote": "Update for Haxe 3",
+  "contributors": [ "singmajesty", "gamehaxe" ],
+  "dependencies": {}
+}
