@@ -640,15 +640,18 @@ class SVGData extends Group {
 		text.kerning = getFloatStyle ("kerning", inText, styles, 0);
 
 		var string = "";
+		var valueString = "";
 		
 		for (el in inText.elements ()) {
 			
 			string += el.toString();
+			valueString += el.firstChild().toString();
 			
 		}
 		
 		//trace(string);
 		text.text = string;
+		text.textValue = valueString;
 		return text;
 		
 	}

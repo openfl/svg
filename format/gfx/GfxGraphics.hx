@@ -1,5 +1,10 @@
 package format.gfx;
 
+import format.svg.Text;
+
+import flash.text.TextField;
+import flash.text.TextFormat;
+
 import flash.display.GradientType;
 import flash.display.SpreadMethod;
 import flash.display.InterpolationMethod;
@@ -7,8 +12,10 @@ import flash.display.CapsStyle;
 import flash.display.JointStyle;
 import flash.display.LineScaleMode;
 import flash.display.Graphics;
+import flash.display.BitmapData;
 
 import flash.geom.Matrix;
+import flash.geom.Point;
 
 class GfxGraphics extends Gfx
 {
@@ -38,5 +45,41 @@ class GfxGraphics extends Gfx
    override public function lineTo(inX:Float, inY:Float) { graphics.lineTo(inX,inY); }
    override public function curveTo(inCX:Float, inCY:Float,inX:Float,inY:Float)
      { graphics.curveTo(inCX,inCY,inX,inY); }
+
+   override public function renderText(text:Text)
+   {
+      var textFormat:TextFormat=new TextFormat();
+      textFormat.size=text.font_size;
+      textFormat.font=text.font_family;
+
+      switch (text.fill) {
+         case FillSolid(color):
+            textFormat.color=color;
+
+         case FillNone:
+         case FillGrad(grad):
+      }
+
+      var textField:TextField=new TextField();
+      textField.defaultTextFormat=textFormat;
+      textField.text=text.textValue;
+
+      textField.width=textField.textWidth;
+      textField.height=textField.textHeight;
+
+      var bitmapData:BitmapData=new BitmapData(Math.ceil(textField.textWidth),Math.ceil(textField.textHeight),true,0);
+      bitmapData.draw(textField);
+
+      var point:Point=text.matrix.transformPoint(new Point(text.x,text.y));
+
+      point.y-=text.font_size;
+
+      var matrix:Matrix=new Matrix();
+      matrix.translate(point.x,point.y);
+
+      graphics.beginBitmapFill(bitmapData,matrix);
+      graphics.drawRect(point.x,point.y,bitmapData.width,bitmapData.height);
+      graphics.endFill();
+   }
 }
 
