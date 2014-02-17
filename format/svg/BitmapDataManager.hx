@@ -12,8 +12,7 @@ import flash.display.BitmapData;
 
 class BitmapDataManager
 {
-   public static var bitmaps = new Map<String, BitmapData>();
-    public static var stage: DisplayObjectContainer;
+   static var bitmaps = new Map<String, BitmapData>();
    static var mScale = 0.0;
 
    public static function create(inSVG:String, inGroup:String, inScale:Float, inCache=false)
@@ -25,10 +24,6 @@ class BitmapDataManager
       var svg = null;
 
       var shape = new Shape();
-//      if (inGroup=="")
-//         svg.RenderObject(shape,shape.graphics);
-//      else
-//         svg.RenderObject(shape,shape.graphics,null, function(_,groups) { return groups[0]==inGroup; });
 
       svg = new SVG(inSVG);
       svg.render(shape.graphics, 0, 0);
@@ -39,10 +34,7 @@ class BitmapDataManager
       var w = Std.int(svg.data.width);
       var h = Std.int(svg.data.height);
       var bmp = new BitmapData(w,h,true,0x00);
-//      var q = gm2d.Lib.current.stage.quality;
-//      flash.Lib.current.stage.quality = flash.display.StageQuality.BEST;
       bmp.draw(shape,matrix);
-//      flash.Lib.current.stage.quality = q;
       if (inCache)
          bitmaps.set(key,bmp);
       return bmp;
