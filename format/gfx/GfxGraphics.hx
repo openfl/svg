@@ -25,6 +25,11 @@ class GfxGraphics extends Gfx
       graphics.beginGradientFill(grad.type,grad.colors,grad.alphas,grad.ratios,grad.matrix,grad.spread,grad.interp,grad.focus);
    }
 
+    override public function beginBitmapFill(fill:BitmapFill)
+    {
+        graphics.beginBitmapFill(fill.bitmapData, fill.matrix, fill.repeat, fill.smooth);
+    }
+
 	override public function beginFill(color:Int, alpha:Float) { graphics.beginFill(color,alpha); }
    override public function endFill() { graphics.endFill(); }
 

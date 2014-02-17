@@ -42,9 +42,10 @@ class SVGData extends Group {
 
 	private var mConvertCubics:Bool;
 	private var mGrads:GradHash;
+    private var mPatterns: Map<String,BitmapFill>;
 	private var mPathParser:PathParser;
-	
-	
+    private var symbols: Map<String, Xml>;
+
 	public function new (inXML:Xml, inConvertCubics:Bool = false) {
 		
 		super();
@@ -53,9 +54,11 @@ class SVGData extends Group {
 		
 		if (svg == null || (svg.nodeName != "svg" && svg.nodeName != "svg:svg"))
 			throw "Not an SVG file (" + (svg==null ? "null" : svg.nodeName) + ")";
-		
+
 		mGrads = new GradHash ();
 		mPathParser = new PathParser ();
+        symbols = new Map();
+        mPatterns = new Map();
 		mConvertCubics = inConvertCubics;
 		
 		width = getFloatStyle ("width", svg, null, 0.0);
@@ -211,7 +214,9 @@ class SVGData extends Group {
 				
 				return FillGrad(mGrads.get(url));
 				
-			}
+			} else if(mPatterns.exists(url)) {
+                return BitmapFill(mPatterns.get(url));
+            }
 			
 			throw ("Unknown url:" + url);
 			
@@ -361,7 +366,36 @@ class SVGData extends Group {
 		}
 		
 	}
-	
+
+    private function loadPattern(inPattern: Xml, inCrossLink: Bool) {
+        var name = inPattern.get("id");
+        var pattern = new BitmapFill();
+
+        if (inCrossLink && inPattern.exists("xlink:href")) {
+
+            var xlink = inPattern.get ("xlink:href");
+
+            if (xlink.charAt(0) != "#")
+                throw ("xlink - unkown syntax : " + xlink);
+
+            var base = mPatterns.get (xlink.substr (1));
+
+            if (base != null) {
+                mPatterns.set(inPattern.get("id"), base);
+            } else {
+
+                throw ("Unknown xlink : " + xlink);
+
+            }
+
+        } else {
+            inPattern.nodeName = "svg";
+            var bitmapData = BitmapDataManager.create(inPattern.toString(), name, 1, true);
+            pattern.bitmapData = bitmapData;
+
+            mPatterns.set(name, pattern);
+        }
+    }
 	
 	private function loadGradient (inGrad:Xml, inType:GradientType, inCrossLink:Bool) {
 		
@@ -493,7 +527,11 @@ class SVGData extends Group {
 			if (name == "defs") {
 				
 				loadDefs (el);
-				
+
+            } else if(name == "symbol") {
+                saveSymbol(el);
+            } else if(name == "use") {
+                applyRef(g, el, matrix, styles);
 			} else if (name == "g") {
 				
 				if (!(el.exists("display") && el.get("display") == "none")) {
@@ -533,7 +571,9 @@ class SVGData extends Group {
 			} else if (name == "radialGradient") {
 				
 				loadGradient (el, GradientType.RADIAL, true);
-				
+
+            } else if (name == "pattern") {
+                loadPattern(el, true);
 			} else {
 				
 				// throw("Unknown child : " + el.nodeName );
@@ -545,6 +585,18 @@ class SVGData extends Group {
 		return g;
 		
 	}
+
+    public inline function saveSymbol(inText: Xml): Void {
+        symbols.set(inText.get("id"), inText.firstElement());
+    }
+
+    public inline function applyRef(g:Group, inText:Xml, matrix:Matrix, inStyles:StringMap <String>): Void {
+        var id: String = inText.get("xlink:href");
+        var svg: Xml = symbols.get(id.substring(1));   //Remove the #
+        if(svg != null) {
+            loadGroup(g, svg, matrix, inStyles);
+        }
+    }
 	
 	
 	public function loadPath (inPath:Xml, matrix:Matrix, inStyles:StringMap<String>, inIsRect:Bool, inIsEllipse:Bool, inIsCircle:Bool=false):Path {
