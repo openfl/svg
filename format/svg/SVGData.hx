@@ -43,6 +43,7 @@ class SVGData extends Group {
 	private var mConvertCubics:Bool;
 	private var mGrads:GradHash;
     private var mPatterns: Map<String,BitmapFill>;
+    private var mPatternsSVG: Map<String,Xml>;
 	private var mPathParser:PathParser;
     private var symbols: Map<String, Xml>;
 
@@ -59,6 +60,7 @@ class SVGData extends Group {
 		mPathParser = new PathParser ();
         symbols = new Map();
         mPatterns = new Map();
+        mPatternsSVG = new Map();
 		mConvertCubics = inConvertCubics;
 		
 		width = getFloatStyle ("width", svg, null, 0.0);
@@ -369,7 +371,6 @@ class SVGData extends Group {
 
     private function loadPattern(inPattern: Xml, inCrossLink: Bool) {
         var name = inPattern.get("id");
-        var pattern = new BitmapFill();
 
         if (inCrossLink && inPattern.exists("xlink:href")) {
 
@@ -381,6 +382,11 @@ class SVGData extends Group {
             var base = mPatterns.get (xlink.substr (1));
 
             if (base != null) {
+                var svg: Xml = mPatternsSVG.get(xlink.substr (1));
+                svg.nodeName = "svg";
+                var bitmapData = BitmapDataManager.create(svg.toString(), name, 1, true);
+                base.bitmapData = bitmapData;
+
                 mPatterns.set(inPattern.get("id"), base);
             } else {
 
@@ -389,10 +395,8 @@ class SVGData extends Group {
             }
 
         } else {
-            inPattern.nodeName = "svg";
-            var bitmapData = BitmapDataManager.create(inPattern.toString(), name, 1, true);
-            pattern.bitmapData = bitmapData;
-
+            var pattern = new BitmapFill();
+            mPatternsSVG.set(name, inPattern);
             mPatterns.set(name, pattern);
         }
     }
@@ -611,7 +615,6 @@ class SVGData extends Group {
 		var styles = getStyles (inPath, inStyles);
 		var name = inPath.exists ("id") ? inPath.get ("id") : "";
 		var path = new Path ();
-		
 		path.fill = getFillStyle ("fill", inPath, styles);
 		path.alpha = getFloatStyle ("opacity", inPath, styles, 1.0);
 		path.fill_alpha = getFloatStyle ("fill-opacity", inPath, styles, 1.0);

@@ -124,6 +124,7 @@ class SVGRenderer
                 mGfx.beginFill(colour,inPath.fill_alpha*inPath.alpha);
              case BitmapFill(fill):
                  fill.updateMatrix(m);
+                 fill.alpha = inPath.alpha;
                  mGfx.beginBitmapFill(fill);
              case FillNone:
                 //mGfx.endFill();
