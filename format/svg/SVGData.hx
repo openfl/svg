@@ -382,11 +382,6 @@ class SVGData extends Group {
             var base = mPatterns.get (xlink.substr (1));
 
             if (base != null) {
-                var svg: Xml = mPatternsSVG.get(xlink.substr (1));
-                svg.nodeName = "svg";
-                var bitmapData = BitmapDataManager.create(svg.toString(), name, 1, true);
-                base.bitmapData = bitmapData;
-
                 mPatterns.set(inPattern.get("id"), base);
             } else {
 
@@ -396,6 +391,10 @@ class SVGData extends Group {
 
         } else {
             var pattern = new BitmapFill();
+            inPattern.nodeName = "svg";
+            var bitmapData = BitmapDataManager.create(inPattern.toString(), name, 1, true);
+            pattern.bitmapData = bitmapData;
+
             mPatternsSVG.set(name, inPattern);
             mPatterns.set(name, pattern);
         }
