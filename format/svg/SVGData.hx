@@ -321,7 +321,6 @@ class SVGData extends Group {
 
 		var style = inNode.get ("style");
 		var strings = mStyleSplit.split (style);
-		
 		for (s in strings) {
 		
 			if (mStyleValue.match (s)) {
@@ -590,20 +589,33 @@ class SVGData extends Group {
 	}
 
     public inline function saveSymbol(inText: Xml): Void {
-        symbols.set(inText.get("id"), inText.firstElement());
+        symbols.set(inText.get("id"), inText);
     }
 
     public inline function applyRef(g:Group, inText:Xml, matrix:Matrix, inStyles:StringMap <String>): Void {
         var id: String = inText.get("xlink:href");
         var svg: Xml = symbols.get(id.substring(1));   //Remove the #
+
         if(svg != null) {
-            loadGroup(g, svg, matrix, inStyles);
+            var viewBox = new Rectangle(0, 0, width, height);
+            if (svg.exists("viewBox")) {
+                var vbox = svg.get("viewBox");
+                var params = vbox.indexOf(",") != -1 ? vbox.split(",") : vbox.split(" ");
+                viewBox = new Rectangle( trimToFloat(params[0]), trimToFloat(params[1]), trimToFloat(params[2]), trimToFloat(params[3]) );
+
+            }
+            for(attr in inText.attributes()) {
+                var value = inText.get(attr);
+                if(value != null && !svg.firstElement().exists(attr) && attr != "xlink:href") {
+                    svg.firstElement().set(attr, value);
+                }
+            }
+            loadGroup(g, svg.firstElement(), new Matrix (1, 0, 0, 1, -viewBox.x, -viewBox.y), null);
         }
     }
 	
 	
 	public function loadPath (inPath:Xml, matrix:Matrix, inStyles:StringMap<String>, inIsRect:Bool, inIsEllipse:Bool, inIsCircle:Bool=false):Path {
-		
 		if (inPath.exists ("transform")) {
 			
 			matrix = matrix.clone ();
@@ -612,11 +624,19 @@ class SVGData extends Group {
 		}
 		
 		var styles = getStyles (inPath, inStyles);
-		var name = inPath.exists ("id") ? inPath.get ("id") : "";
+        var name = inPath.exists ("id") ? inPath.get ("id") : "";
 		var path = new Path ();
 		path.fill = getFillStyle ("fill", inPath, styles);
-		path.alpha = getFloatStyle ("opacity", inPath, styles, 1.0);
-		path.fill_alpha = getFloatStyle ("fill-opacity", inPath, styles, 1.0);
+        path.alpha = getFloatStyle ("opacity", inPath, styles, 1.0);
+        switch(path.fill) {
+            case FillGrad(grad):
+                var alphas: Array<Float> = grad.alphas;
+                for(i in 0...alphas.length) {
+                    alphas[i] = alphas[i] * path.alpha;
+                }
+            default:
+        }
+        path.fill_alpha = getFloatStyle ("fill-opacity", inPath, styles, 1.0);
 		path.stroke_alpha = getFloatStyle ("stroke-opacity", inPath, styles, 1.0);
 		path.stroke_colour = getStrokeStyle ("stroke", inPath, styles, null);
 		path.stroke_width = getFloatStyle ("stroke-width", inPath, styles, 1.0);

@@ -17,9 +17,11 @@ class BitmapDataManager
 
    public static function create(inSVG:String, inGroup:String, inScale:Float, inCache=false)
    {
-      var key = inGroup + " : " +inScale;
-      if (bitmaps.exists(key))
-         return bitmaps.get(key);
+      var key = inSVG + " : " + inGroup + " : " +inScale;
+      if (bitmaps.exists(key)) {
+          trace("getting cache " + key);
+          return bitmaps.get(key);
+      }
 
       var svg = null;
 
