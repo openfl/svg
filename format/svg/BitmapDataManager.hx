@@ -19,7 +19,6 @@ class BitmapDataManager
    {
       var key = inSVG + " : " + inGroup + " : " +inScale;
       if (bitmaps.exists(key)) {
-          trace("getting cache " + key);
           return bitmaps.get(key);
       }
 
