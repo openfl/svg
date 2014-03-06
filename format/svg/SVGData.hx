@@ -543,7 +543,6 @@ class SVGData extends Group {
 				}
 				
 			} else if (name == "path" || name == "line" || name == "polyline") {
-				
 				g.children.push (DisplayPath (loadPath (el, matrix, styles, false, false)));
 				
 			} else if (name == "rect") {
@@ -592,25 +591,30 @@ class SVGData extends Group {
         symbols.set(inText.get("id"), inText);
     }
 
-    public inline function applyRef(g:Group, inText:Xml, matrix:Matrix, inStyles:StringMap <String>): Void {
-        var id: String = inText.get("xlink:href");
+    private inline function getLinkXml(id: String, inText: Xml): Xml {
         var svg: Xml = symbols.get(id.substring(1));   //Remove the #
 
         if(svg != null) {
-            var viewBox = new Rectangle(0, 0, width, height);
-            if (svg.exists("viewBox")) {
-                var vbox = svg.get("viewBox");
-                var params = vbox.indexOf(",") != -1 ? vbox.split(",") : vbox.split(" ");
-                viewBox = new Rectangle( trimToFloat(params[0]), trimToFloat(params[1]), trimToFloat(params[2]), trimToFloat(params[3]) );
-            }
-
-            var xOffset: Float = Std.parseFloat(inText.get("x"));
-            if(Math.isNaN(xOffset)) {
-                xOffset = 0;
-            }
-            var yOffset: Float = Std.parseFloat(inText.get("y"));
-            if(Math.isNaN(yOffset)) {
-                yOffset = 0;
+            if(svg.firstElement().get("operated") == null) {
+                var newParent: Xml = Xml.createElement("g");
+                newParent.set("operated", "true");
+                var newChildren: List<Xml> = new List<Xml>();
+                while(svg.firstElement() != null) {
+                    var linkId: String = svg.firstElement().get("xlink:href");
+                    if(linkId != null) {
+                        var link: Xml = getLinkXml(linkId, svg.firstElement());
+                        link = Xml.parse(link.toString());
+                        newChildren.add(link.firstElement().firstElement());
+                        svg.removeChild(svg.firstElement());
+                    } else {
+                        newChildren.add(svg.firstElement());
+                        svg.removeChild(svg.firstElement());
+                    }
+                }
+                svg.addChild(newParent);
+                for(child in newChildren) {
+                    newParent.addChild(child);
+                }
             }
 
             for(attr in inText.attributes()) {
@@ -619,8 +623,29 @@ class SVGData extends Group {
                     svg.firstElement().set(attr, value);
                 }
             }
-            loadGroup(g, svg.firstElement(), new Matrix (1, 0, 0, 1, -viewBox.x + xOffset, -viewBox.y + yOffset), null);
         }
+        return svg;
+    }
+
+    public inline function applyRef(g:Group, inText:Xml, matrix:Matrix, inStyles:StringMap <String>): Void {
+        var id: String = inText.get("xlink:href");
+        var svg: Xml = getLinkXml(id, inText);
+        var viewBox = new Rectangle(0, 0, width, height);
+        if (svg.exists("viewBox")) {
+            var vbox = svg.get("viewBox");
+            var params = vbox.indexOf(",") != -1 ? vbox.split(",") : vbox.split(" ");
+            viewBox = new Rectangle( trimToFloat(params[0]), trimToFloat(params[1]), trimToFloat(params[2]), trimToFloat(params[3]) );
+        }
+
+        var xOffset: Float = Std.parseFloat(inText.get("x"));
+        if(Math.isNaN(xOffset)) {
+            xOffset = 0;
+        }
+        var yOffset: Float = Std.parseFloat(inText.get("y"));
+        if(Math.isNaN(yOffset)) {
+            yOffset = 0;
+        }
+        loadGroup(g, svg.firstElement(), new Matrix (1, 0, 0, 1, -viewBox.x + xOffset, -viewBox.y + yOffset), null);
     }
 	
 	
