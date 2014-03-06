@@ -602,15 +602,24 @@ class SVGData extends Group {
                 var vbox = svg.get("viewBox");
                 var params = vbox.indexOf(",") != -1 ? vbox.split(",") : vbox.split(" ");
                 viewBox = new Rectangle( trimToFloat(params[0]), trimToFloat(params[1]), trimToFloat(params[2]), trimToFloat(params[3]) );
-
             }
+
+            var xOffset: Float = Std.parseFloat(inText.get("x"));
+            if(Math.isNaN(xOffset)) {
+                xOffset = 0;
+            }
+            var yOffset: Float = Std.parseFloat(inText.get("y"));
+            if(Math.isNaN(yOffset)) {
+                yOffset = 0;
+            }
+
             for(attr in inText.attributes()) {
                 var value = inText.get(attr);
-                if(value != null && !svg.firstElement().exists(attr) && attr != "xlink:href") {
+                if(value != null && attr != "xlink:href") {
                     svg.firstElement().set(attr, value);
                 }
             }
-            loadGroup(g, svg.firstElement(), new Matrix (1, 0, 0, 1, -viewBox.x, -viewBox.y), null);
+            loadGroup(g, svg.firstElement(), new Matrix (1, 0, 0, 1, -viewBox.x + xOffset, -viewBox.y + yOffset), null);
         }
     }
 	
