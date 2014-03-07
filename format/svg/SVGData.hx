@@ -80,7 +80,6 @@ class SVGData extends Group {
             var vbox = svg.get("viewBox");
             var params = vbox.indexOf(",") != -1 ? vbox.split(",") : vbox.split(" ");
             viewBox = new Rectangle( trimToFloat(params[0]), trimToFloat(params[1]), trimToFloat(params[2]), trimToFloat(params[3]) );
-
         }
 
         loadGroup(this, svg, new Matrix (1, 0, 0, 1, -viewBox.x, -viewBox.y), null);
@@ -592,7 +591,7 @@ class SVGData extends Group {
         symbols.set(inText.get("id"), inText);
     }
 
-    public inline function applyRef(g:Group, inText:Xml, matrix:Matrix, inStyles:StringMap <String>): Group {
+    public function applyRef(g:Group, inText:Xml, matrix:Matrix, inStyles:StringMap <String>): Group {
         var id: String = inText.get("xlink:href");
         var svg: Xml = symbols.get(id.substring(1));   //Remove the #
 
