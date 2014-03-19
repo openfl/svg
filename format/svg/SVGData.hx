@@ -186,7 +186,6 @@ class SVGData extends Group {
 
 
     private function getFillStyle (inKey:String, inNode:Xml, inStyles:StringMap<String>) {
-
         var s = getStyle (inKey, inNode, inStyles, "");
 
         if (s == "") {
@@ -223,6 +222,14 @@ class SVGData extends Group {
 
         }
 
+        if(StringTools.startsWith(s, "rgb")) {
+            var r: EReg = ~/rgb/g;
+            var rgbFull: Array<String> = r.split(s);
+            var rgb: String = StringTools.replace(rgbFull[1], "(", "");
+            rgb = StringTools.replace(rgb, ")", "");
+            var frags: Array<String> = rgb.split(",");
+            return FillSolid(rgbToHex(Std.parseInt(frags[0]), Std.parseInt(frags[1]), Std.parseInt(frags[2])));
+        }
         throw ("Unknown fill string:" + s);
 
         return FillNone;
@@ -776,4 +783,7 @@ class SVGData extends Group {
     }
 
 
+    private inline function rgbToHex(r: Int, g: Int, b: Int): Int {
+        return r << 16 ^ g << 8 ^ b;
+    }
 }
