@@ -23,11 +23,7 @@ class Gradient
    }
 
    public var type:GradientType;
-   #if flash
-      public var colors:Array<UInt>;
-   #else
-      public var colors:Array<Int>;
-   #end
+   public var colors:Array<UInt>;
    public var alphas:Array<Float>;
    public var ratios:Array<Int>;
    public var matrix: Matrix;
