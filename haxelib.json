@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ "cpp", "flash" ],
   "description": "Provides support for parsing and rendering SVG content",
-  "version": "1.0.7",
-  "releasenote": "Update for Haxe 3",
+  "version": "1.0.8",
+  "releasenote": "Compile fix",
   "contributors": [ "singmajesty", "gamehaxe" ],
   "dependencies": {}
 }
