@@ -46,6 +46,9 @@ class SVGData extends Group {
     private var mPatternsSVG: Map<String,Xml>;
     private var mPathParser:PathParser;
     private var symbols: Map<String, Xml>;
+    private var mLinkPaths: Map<String, Xml>;
+    private var mClipPathLinks: Map<String, String>;
+    private var clipIncId: Int = 1;
 
     public function new (inXML:Xml, inConvertCubics:Bool = false) {
 
@@ -100,13 +103,13 @@ class SVGData extends Group {
 
         if (mTranslateMatch.match(inTrans))
         {
-            // TODO: Pre-translate
+// TODO: Pre-translate
 
             ioMatrix.translate (Std.parseFloat (mTranslateMatch.matched (1)), Std.parseFloat (mTranslateMatch.matched (2)));
 
         } else if (mScaleMatch.match (inTrans)) {
 
-            // TODO: Pre-scale
+// TODO: Pre-scale
             var s = Std.parseFloat (mScaleMatch.matched (1));
             ioMatrix.scale (s, s);
             scale = s;
@@ -344,7 +347,7 @@ class SVGData extends Group {
 
     private function loadDefs (inXML:Xml) {
 
-        // Two passes - to allow forward xlinks
+// Two passes - to allow forward xlinks
 
         for (pass in 0...2) {
 
@@ -366,6 +369,11 @@ class SVGData extends Group {
 
                     loadGradient (def, GradientType.RADIAL, pass == 1);
 
+                } else if(name == "path") {
+                    if(mLinkPaths == null) {
+                        mLinkPaths = new Map();
+                    }
+                    mLinkPaths.set(def.get("id"), def);
                 }
 
             }
@@ -461,7 +469,7 @@ class SVGData extends Group {
 
         }
 
-        // todo - grad.spread = base.spread;
+// todo - grad.spread = base.spread;
 
         for (stop in inGrad.elements ()) {
 
@@ -499,15 +507,15 @@ class SVGData extends Group {
 
         var styles = getStyles (inG, inStyles);
 
-        /*
-        supports eg:
-        <g>
-            <g opacity="0.5">
-                <path ... />
-                <polygon ... />
-            </g>
-        </g>
-        */
+/*
+supports eg:
+<g>
+    <g opacity="0.5">
+        <path ... />
+        <polygon ... />
+    </g>
+</g>
+*/
         if (inG.exists("opacity")) {
 
             var opacity = inG.get("opacity");
@@ -520,6 +528,28 @@ class SVGData extends Group {
 
             styles.set("opacity", opacity);
 
+        }
+
+        if(styles != null && styles.exists("clip-path")) {
+//we're clipping
+// we need to get the bitmap fill and apply it to the path
+            var clipFill = new BitmapFill();
+            inG.nodeName = "svg";
+            inG.remove("style");
+            var inGString: String = inG.toString();
+            var bitmapData = BitmapDataManager.create(inGString, inGString, 1, false);
+            clipFill.bitmapData = bitmapData;
+
+            var clipId: String = styles.get("clip-path");
+            clipId = clipId.substring(5, clipId.length - 1);
+            var pathId: String = mClipPathLinks.get(clipId);
+            var clipXml: Xml = mLinkPaths.get(pathId);
+            pathId += "_" + clipIncId++;
+            mPatterns.set(pathId, clipFill);
+            clipXml.set("style:fill", "url(#" + pathId + ")");
+            styles.set("fill", "url(#" + pathId + ")");
+            g.children.push (DisplayPath (loadPath (clipXml, matrix, styles, false, false)));
+            return g;
         }
 
         for (el in inG.elements ()) {
@@ -582,9 +612,11 @@ class SVGData extends Group {
 
             } else if (name == "pattern") {
                 loadPattern(el, true);
+            } else if (name == "clipPath") {
+                storeClipPath(el);
             } else {
 
-                // throw("Unknown child : " + el.nodeName );
+// throw("Unknown child : " + el.nodeName );
 
             }
 
@@ -596,6 +628,21 @@ class SVGData extends Group {
 
     public inline function saveSymbol(inText: Xml): Void {
         symbols.set(inText.get("id"), inText);
+    }
+
+    private inline function storeClipPath(inText: Xml): Void {
+        if(mClipPathLinks == null) {
+            mClipPathLinks = new Map();
+        }
+        var linkUrl: String = "";
+        for(el in inText.elements()) {
+            var name = el.nodeName;
+            if(name == "use") {
+                linkUrl = el.get("xlink:href");
+                break;
+            }
+        }
+        mClipPathLinks.set(inText.get("id"), linkUrl.substring(1));
     }
 
     public function applyRef(g:Group, inText:Xml, matrix:Matrix, inStyles:StringMap <String>): Group {
@@ -683,19 +730,19 @@ class SVGData extends Group {
 
                 path.segments.push (new MoveSegment (x, y + ry));
 
-                // top-left
+// top-left
                 path.segments.push (new QuadraticSegment (x, y, x + rx, y));
                 path.segments.push (new DrawSegment (x + w - rx, y));
 
-                // top-right
+// top-right
                 path.segments.push (new QuadraticSegment (x + w, y, x + w, y + rx));
                 path.segments.push (new DrawSegment (x + w, y + h - ry));
 
-                // bottom-right
+// bottom-right
                 path.segments.push (new QuadraticSegment (x + w, y + h, x + w - rx, y + h));
                 path.segments.push (new DrawSegment (x + rx, y + h));
 
-                // bottom-left
+// bottom-left
                 path.segments.push (new QuadraticSegment (x, y + h, x, y + h - ry));
                 path.segments.push (new DrawSegment (x, y + ry));
 
@@ -776,7 +823,7 @@ class SVGData extends Group {
 
         }
 
-        //trace(string);
+//trace(string);
         text.text = string;
         return text;
 
