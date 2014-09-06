@@ -1,8 +1,8 @@
 package format.svg;
-import flash.geom.Rectangle;
-import flash.geom.Matrix;
-import flash.geom.Point;
-import flash.display.Graphics;
+import openfl.geom.Rectangle;
+import openfl.geom.Matrix;
+import openfl.geom.Point;
+import openfl.display.Graphics;
 import format.gfx.Gfx;
 
 class PathSegment

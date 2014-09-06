@@ -3,10 +3,10 @@ package format.svg;
 //import gm2d.reso.Resources;
 import format.svg.SvgRenderer;
 
-import flash.geom.Matrix;
-import flash.display.Shape;
-import flash.display.Bitmap;
-import flash.display.BitmapData;
+import openfl.geom.Matrix;
+import openfl.display.Shape;
+import openfl.display.Bitmap;
+import openfl.display.BitmapData;
 
 
 class BitmapDataManager
@@ -37,7 +37,7 @@ class BitmapDataManager
       var h = Std.int(svg.height*inScale +  0.99);
       var bmp = new BitmapData(w,h,true,0x00);
       var q = gm2d.Lib.current.stage.quality;
-      flash.Lib.current.stage.quality = flash.display.StageQuality.BEST;
+      flash.Lib.current.stage.quality = openfl.display.StageQuality.BEST;
       bmp.draw(shape,matrix);
       flash.Lib.current.stage.quality = q;
 
