@@ -1,14 +1,14 @@
 package format.svg;
 
-import flash.geom.Matrix;
-import flash.geom.Rectangle;
+import openfl.geom.Matrix;
+import openfl.geom.Rectangle;
 
-import flash.display.GradientType;
-import flash.display.SpreadMethod;
-import flash.display.InterpolationMethod;
-import flash.display.CapsStyle;
-import flash.display.JointStyle;
-import flash.display.LineScaleMode;
+import openfl.display.GradientType;
+import openfl.display.SpreadMethod;
+import openfl.display.InterpolationMethod;
+import openfl.display.CapsStyle;
+import openfl.display.JointStyle;
+import openfl.display.LineScaleMode;
 
 class Grad extends /*gm2d.gfx.Gradient*/format.gfx.Gradient
 {

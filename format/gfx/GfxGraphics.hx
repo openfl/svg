@@ -1,14 +1,14 @@
 package format.gfx;
 
-import flash.display.GradientType;
-import flash.display.SpreadMethod;
-import flash.display.InterpolationMethod;
-import flash.display.CapsStyle;
-import flash.display.JointStyle;
-import flash.display.LineScaleMode;
-import flash.display.Graphics;
+import openfl.display.GradientType;
+import openfl.display.SpreadMethod;
+import openfl.display.InterpolationMethod;
+import openfl.display.CapsStyle;
+import openfl.display.JointStyle;
+import openfl.display.LineScaleMode;
+import openfl.display.Graphics;
 
-import flash.geom.Matrix;
+import openfl.geom.Matrix;
 
 class GfxGraphics extends Gfx
 {
@@ -24,6 +24,11 @@ class GfxGraphics extends Gfx
    {
       graphics.beginGradientFill(grad.type,grad.colors,grad.alphas,grad.ratios,grad.matrix,grad.spread,grad.interp,grad.focus);
    }
+
+    override public function beginBitmapFill(fill:BitmapFill)
+    {
+        graphics.beginBitmapFill(fill.bitmapData, fill.matrix, fill.repeat, fill.smooth);
+    }
 
 	override public function beginFill(color:Int, alpha:Float) { graphics.beginFill(color,alpha); }
    override public function endFill() { graphics.endFill(); }

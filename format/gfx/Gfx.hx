@@ -1,14 +1,14 @@
 package format.gfx;
 
-import flash.display.GradientType;
-import flash.display.SpreadMethod;
-import flash.display.InterpolationMethod;
-import flash.display.CapsStyle;
-import flash.display.JointStyle;
-import flash.display.LineScaleMode;
+import openfl.display.GradientType;
+import openfl.display.SpreadMethod;
+import openfl.display.InterpolationMethod;
+import openfl.display.CapsStyle;
+import openfl.display.JointStyle;
+import openfl.display.LineScaleMode;
 import format.svg.Text;
 
-import flash.geom.Matrix;
+import openfl.geom.Matrix;
 
 class Gfx
 {
@@ -16,6 +16,7 @@ class Gfx
    public function geometryOnly() { return false; }
    public function size(inWidth:Float,inHeight:Float) { }
    public function beginGradientFill(grad:Gradient) { }
+   public function beginBitmapFill(bitmap: BitmapFill) {}
 
 	public function beginFill(color:Int, alpha:Float) { }
    public function endFill() { }

@@ -3,25 +3,25 @@ package format.svg;
 import format.svg.PathParser;
 import format.svg.PathSegment;
 
-import flash.geom.Matrix;
-import flash.geom.Rectangle;
-import flash.display.Graphics;
+import openfl.geom.Matrix;
+import openfl.geom.Rectangle;
+import openfl.display.Graphics;
 
-import flash.display.Shape;
-import flash.display.Sprite;
-import flash.display.DisplayObject;
-import flash.display.GradientType;
-import flash.display.SpreadMethod;
-import flash.display.InterpolationMethod;
-import flash.display.CapsStyle;
-import flash.display.JointStyle;
-import flash.display.LineScaleMode;
+import openfl.display.Shape;
+import openfl.display.Sprite;
+import openfl.display.DisplayObject;
+import openfl.display.GradientType;
+import openfl.display.SpreadMethod;
+import openfl.display.InterpolationMethod;
+import openfl.display.CapsStyle;
+import openfl.display.JointStyle;
+import openfl.display.LineScaleMode;
 
 import format.svg.Grad;
 import format.svg.Group;
 import format.svg.FillType;
 import format.gfx.Gfx;
-import flash.geom.Rectangle;
+import openfl.geom.Rectangle;
 
 
 typedef GroupPath = Array<String>;
@@ -115,13 +115,17 @@ class SVGRenderer
           //  4. continue with "real" drawing
           inPath.segments[0].toGfx(mGfx, context);
 
-          switch(inPath.fill)
+           switch(inPath.fill)
           {
              case FillGrad(grad):
                 grad.updateMatrix(m);
                 mGfx.beginGradientFill(grad);
              case FillSolid(colour):
                 mGfx.beginFill(colour,inPath.fill_alpha*inPath.alpha);
+             case BitmapFill(fill):
+                 fill.updateMatrix(m);
+                 fill.alpha = inPath.alpha;
+                 mGfx.beginBitmapFill(fill);
              case FillNone:
                 //mGfx.endFill();
           }
@@ -312,9 +316,9 @@ class SVGRenderer
        var w = Std.int(Math.ceil( inRect==null ? width : inRect.width*inScale ));
        var h = Std.int(Math.ceil( inRect==null ? width : inRect.height*inScale ));
 
-       var bmp = new flash.display.BitmapData(w,h,true,#if (neko && !haxe3) { a: 0x00, rgb: 0x000000 } #else 0x00000000 #end);
+       var bmp = new openfl.display.BitmapData(w,h,true,#if (neko && !haxe3) { a: 0x00, rgb: 0x000000 } #else 0x00000000 #end);
 
-       var shape = new flash.display.Shape();
+       var shape = new openfl.display.Shape();
        mGfx = new format.gfx.GfxGraphics(shape.graphics);
 
        mGroupPath = [];
