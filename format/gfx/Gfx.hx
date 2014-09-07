@@ -16,6 +16,7 @@ class Gfx
    public function geometryOnly() { return false; }
    public function size(inWidth:Float,inHeight:Float) { }
    public function beginGradientFill(grad:Gradient) { }
+   public function beginBitmapFill(bitmap: BitmapFill) {}
 
 	public function beginFill(color:Int, alpha:Float) { }
    public function endFill() { }

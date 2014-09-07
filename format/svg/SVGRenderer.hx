@@ -115,13 +115,17 @@ class SVGRenderer
           //  4. continue with "real" drawing
           inPath.segments[0].toGfx(mGfx, context);
 
-          switch(inPath.fill)
+           switch(inPath.fill)
           {
              case FillGrad(grad):
                 grad.updateMatrix(m);
                 mGfx.beginGradientFill(grad);
              case FillSolid(colour):
                 mGfx.beginFill(colour,inPath.fill_alpha*inPath.alpha);
+             case BitmapFill(fill):
+                 fill.updateMatrix(m);
+                 fill.alpha = inPath.alpha;
+                 mGfx.beginBitmapFill(fill);
              case FillNone:
                 //mGfx.endFill();
           }

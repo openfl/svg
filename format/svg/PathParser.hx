@@ -15,33 +15,33 @@ class PathParser {
     
     static var sCommandArgs:Array<Int>;
 
-    static inline var MOVE  = 77; //"M".charCodeAt(0);
-    static inline var MOVER = 109; //"m".charCodeAt(0);
-    static inline var LINE  = 76; // "L".charCodeAt(0);
-    static inline var LINER = 108; // "l".charCodeAt(0);
-    static inline var HLINE = 72; // "H".charCodeAt(0);
-    static inline var HLINER = 104; // "h".charCodeAt(0);
-    static inline var VLINE = 86; // "V".charCodeAt(0);
-    static inline var VLINER = 118; // "v".charCodeAt(0);
-    static inline var CUBIC = 67; // "C".charCodeAt(0);
-    static inline var CUBICR = 99; // "c".charCodeAt(0);
-    static inline var SCUBIC = 83; // "S".charCodeAt(0);
-    static inline var SCUBICR = 115; // "s".charCodeAt(0);
-    static inline var QUAD = 81; // "Q".charCodeAt(0);
-    static inline var QUADR = 113; // "q".charCodeAt(0);
-    static inline var SQUAD = 84; // "T".charCodeAt(0);
-    static inline var SQUADR = 116; // "t".charCodeAt(0);
-    static inline var ARC = 65; // "A".charCodeAt(0);
-    static inline var ARCR = 97; // "a".charCodeAt(0);
-    static inline var CLOSE = 90; // "Z".charCodeAt(0);
-    static inline var CLOSER = 122; // "z".charCodeAt(0);
+    static inline var MOVE  = "M".code;
+    static inline var MOVER = "m".code;
+    static inline var LINE  = "L".code;
+    static inline var LINER = "l".code;
+    static inline var HLINE = "H".code;
+    static inline var HLINER = "h".code;
+    static inline var VLINE = "V".code;
+    static inline var VLINER = "v".code;
+    static inline var CUBIC = "C".code;
+    static inline var CUBICR = "c".code;
+    static inline var SCUBIC = "S".code;
+    static inline var SCUBICR = "s".code;
+    static inline var QUAD = "Q".code;
+    static inline var QUADR = "q".code;
+    static inline var SQUAD = "T".code;
+    static inline var SQUADR = "t".code;
+    static inline var ARC = "A".code;
+    static inline var ARCR = "a".code;
+    static inline var CLOSE = "Z".code;
+    static inline var CLOSER = "z".code;
 
-    static var UNKNOWN = -1;
-    static var SEPARATOR = -2;
-    static var FLOAT = -3;
-    static var FLOAT_SIGN = -4;
-    static var FLOAT_DOT = -5;
-    static var FLOAT_EXP = -6;
+    static inline var UNKNOWN = -1;
+    static inline var SEPARATOR = -2;
+    static inline var FLOAT = -3;
+    static inline var FLOAT_SIGN = -4;
+    static inline var FLOAT_DOT = -5;
+    static inline var FLOAT_EXP = -6;
 
 
 
