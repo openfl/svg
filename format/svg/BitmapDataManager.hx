@@ -34,11 +34,12 @@ class BitmapDataManager
       var w = Std.int(svg.data.width);
       var h = Std.int(svg.data.height);
       var bmp = new BitmapData(w,h,true,0x00);
-      var q = gm2d.Lib.current.stage.quality;
-      flash.Lib.current.stage.quality = openfl.display.StageQuality.BEST;
+
       bmp.draw(shape,matrix);
+
       if (inCache)
          bitmaps.set(key,bmp);
+
       return bmp;
    }
 

@@ -12,7 +12,7 @@ class PathParser {
     var lastMoveY:Float;
     var prev:PathSegment;
 
-    
+
     static var sCommandArgs:Array<Int>;
 
     static inline var MOVE  = "M".code;
@@ -62,7 +62,7 @@ class PathParser {
         var current_command_pos = 0;
         var current_command = -1;
         var current_args = -1;
-        
+
         prev = null;
 
         var len = pathToParse.length;
@@ -74,7 +74,7 @@ class PathParser {
 
             if (command==UNKNOWN)
                throw("failed parsing path near '"+pathToParse.substr(pos)+"'");
- 
+
             if (command==SEPARATOR)
             {
                pos++;
@@ -155,7 +155,7 @@ class PathParser {
                   prev = createCommand( current_command, args );
                   if (prev==null)
                      throw "Unknown command " + String.fromCharCode(current_command) +
-                        " near '" + pathToParse.substr(current_command_pos) + "'"; 
+                        " near '" + pathToParse.substr(current_command_pos) + "'";
                   if (inConvertCubics && prev.getType()==PathSegment.CUBIC)
                   {
                      var cubic:CubicSegment = cast prev;
@@ -186,12 +186,12 @@ class PathParser {
         if (current_command>=0 && !finished)
         {
             throw "Unfinished command (" + args.length + "/" + current_args +
-                ") near '" + pathToParse.substr(current_command_pos) + "'"; 
+                ") near '" + pathToParse.substr(current_command_pos) + "'";
         }
-        
+
         return segments;
     }
-    
+
     function commandArgs( inCode:Int ) : Int
     {
        if (inCode==10) return SEPARATOR;
@@ -222,7 +222,7 @@ class PathParser {
     function prevY():Float { return (prev!=null) ? prev.prevY() : 0; }
     function prevCX():Float { return (prev!=null) ? prev.prevCX() : 0; }
     function prevCY():Float { return (prev!=null) ? prev.prevCY() : 0; }
-    
+
     function createCommand( code:Int , a:Array<Float> ) : PathSegment
     {
         switch(code)
@@ -284,4 +284,3 @@ class PathParser {
         return null;
     }
 }
-
