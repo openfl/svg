@@ -1,7 +1,7 @@
 package format.svg;
 
 //import gm2d.reso.Resources;
-import format.svg.SvgRenderer;
+import format.svg.SVGRenderer;
 
 import flash.geom.Matrix;
 import flash.display.Shape;
