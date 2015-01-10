@@ -1,3 +1,5 @@
+[![Haxelib Version](https://img.shields.io/github/tag/openfl/svg.svg?style=flat&label=release)](http://lib.haxe.org/p/svg)
+
 SVG
 ===
 
