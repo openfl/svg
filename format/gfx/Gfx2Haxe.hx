@@ -50,7 +50,7 @@ class Gfx2Haxe extends Gfx
    override public function lineStyle(style:LineStyle)
    {
       commands.push("g.lineStyle("+f2a(style.thickness)+","+style.color+","+f2a(style.alpha)+"," + style.pixelHinting + "," +
-                             style.scaleMode + "," + style.capsStyle + "," + style.jointStyle + "," + f2a(style.miterLimit) );
+                             style.scaleMode + "," + style.capsStyle + "," + style.jointStyle + "," + f2a(style.miterLimit)+ ");" );
    }
 
 
