@@ -34,11 +34,14 @@ class Main extends Sprite {
 	
 	
 	public function new () {
+		
+		super ();
+		
+		var svg = new SVG (Assets.getText ("assets/icon.svg"));
+		svg.render (graphics);
+		
+	}
 	
-	super ();
-	
-	var svg = new SVG (Assets.getText ("assets/icon.svg"));
-	svg.render (graphics);
 	
 }
 ```
