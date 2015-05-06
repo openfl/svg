@@ -16,6 +16,26 @@ You can easily install SVG using haxelib:
 To add it to a Lime or OpenFL project, add this to your project file:
 
     <haxelib name="svg" />
+    
+
+Usage
+=====
+
+    package;
+    
+    import openfl.display.Sprite;
+    import openfl.Assets;
+    import format.SVG;
+    
+    class Main extends Sprite {
+        public function new() {
+		
+		    super();
+		    var svgExample = new SVG(Assets.getText("assets/mysvg.svg"));
+		    svgExample.render(this.graphics);
+		
+	    }
+    }
 
 
 Development Builds
