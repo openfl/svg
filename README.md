@@ -23,18 +23,25 @@ Usage
 
     package;
     
+    
+    import format.SVG;
     import openfl.display.Sprite;
     import openfl.Assets;
-    import format.SVG;
+    
     
     class Main extends Sprite {
-        public function new() {
+    	
+    	
+        public function new () {
 		
-		    super();
-		    var svgExample = new SVG(Assets.getText("assets/mysvg.svg"));
-		    svgExample.render(this.graphics);
+		super ();
 		
-	    }
+		var svg = new SVG (Assets.getText ("assets/icon.svg"));
+		svg.render (graphics);
+		
+	}
+	
+	
     }
 
 
