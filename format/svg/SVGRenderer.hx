@@ -149,8 +149,13 @@ class SVGRenderer
        for(segment in inPath.segments)
           segment.toGfx(mGfx, context);
 
+
+       // endFill automatically close an open path
+       // by putting endLineStyle before endFill, the closing line is not drawn
+       // so an open path in inkscape stay open in openfl
+       // this does not affect closed path
+       mGfx.endLineStyle(); 
        mGfx.endFill();
-       mGfx.endLineStyle();
     }
 
 
