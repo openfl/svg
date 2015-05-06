@@ -27,8 +27,8 @@ typedef StringMap<T> = Hash<T>;
 class SVGData extends Group {
 	
 	
-	private static var SIN45:Float = 0.70710678118654752440084436210485;
-	private static var TAN22:Float = 0.4142135623730950488016887242097;
+	private static inline var SIN45:Float = 0.70710678118654752440084436210485;
+	private static inline var TAN22:Float = 0.4142135623730950488016887242097;
 	private static var mStyleSplit = ~/;/g;
 	private static var mStyleValue = ~/\s*(.*)\s*:\s*(.*)\s*/;
 	private static var mTranslateMatch = ~/translate\((.*)[, ](.*)\)/;
@@ -68,8 +68,25 @@ class SVGData extends Group {
 		else if (height == 0)
 			height = width;
 
-		loadGroup(this, svg, new Matrix (), null);
+		var viewBox = new Rectangle(0, 0, width, height);
+
+		if (svg.exists("viewBox")) {
+
+			var vbox = svg.get("viewBox");
+			var params = vbox.indexOf(",") != -1 ? vbox.split(",") : vbox.split(" ");
+			viewBox = new Rectangle( trimToFloat(params[0]), trimToFloat(params[1]), trimToFloat(params[2]), trimToFloat(params[3]) );
+
+		}
+
+		loadGroup(this, svg, new Matrix (1, 0, 0, 1, -viewBox.x, -viewBox.y), null);
 		
+	}
+
+
+	inline function trimToFloat (value:String) {
+
+		return Std.parseFloat( StringTools.trim(value) );
+
 	}
 	
 	
@@ -454,7 +471,30 @@ class SVGData extends Group {
 		}
 		
 		var styles = getStyles (inG, inStyles);
-		
+
+		/*
+		supports eg:
+		<g>
+			<g opacity="0.5">
+				<path ... />
+				<polygon ... />
+			</g>
+		</g>
+		*/
+		if (inG.exists("opacity")) {
+
+			var opacity = inG.get("opacity");
+
+			if (styles == null)
+				styles = new StringMap<String>();
+
+			if (styles.exists("opacity"))
+				opacity = Std.string( Std.parseFloat(opacity) * Std.parseFloat(styles.get("opacity")) );
+			
+			styles.set("opacity", opacity);
+
+		}
+
 		for (el in inG.elements ()) {
 			
 			var name = el.nodeName;
