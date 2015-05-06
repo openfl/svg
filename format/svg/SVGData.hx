@@ -655,6 +655,7 @@ class SVGData extends Group {
 		text.font_size = getFloatStyle ("font-size", inText, styles, 12);
 		text.letter_spacing = getFloatStyle ("letter-spacing", inText, styles, 0);
 		text.kerning = getFloatStyle ("kerning", inText, styles, 0);
+		text.text_align = getStyle ("text-align", inText, styles, "start");
 
 		var string = "";
 		

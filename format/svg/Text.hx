@@ -21,5 +21,6 @@ class Text
    public var font_size:Float;
    public var kerning:Float;
    public var letter_spacing:Float;
+   public var text_align:String;
 }
 
