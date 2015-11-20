@@ -134,7 +134,7 @@ class SVGRenderer
           else
           {
              var style = new format.gfx.LineStyle();
-             var scale = Math.sqrt(m.a*m.a + m.c*m.c);
+             var scale = Math.sqrt(m.a*m.a + m.d*m.d);
              style.thickness = inPath.stroke_width*scale;
              style.alpha = inPath.stroke_alpha*inPath.alpha;
              style.color = inPath.stroke_colour;
