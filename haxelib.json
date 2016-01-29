@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ "cpp", "flash" ],
   "description": "Provides support for parsing and rendering SVG content",
-  "version": "1.0.8",
-  "releasenote": "Compile fix",
+  "version": "1.0.9",
+  "releasenote": "Update for OpenFL 3.6",
   "contributors": [ "singmajesty", "gamehaxe" ],
   "dependencies": {}
 }
