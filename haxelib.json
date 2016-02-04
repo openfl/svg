@@ -7,5 +7,8 @@
   "version": "1.0.8",
   "releasenote": "Compile fix",
   "contributors": [ "singmajesty", "gamehaxe" ],
-  "dependencies": {}
+  "dependencies": {
+    "munit": "2.1.2",
+    "hamcrest": "2.0.1"
+  }
 }
