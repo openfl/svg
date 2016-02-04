@@ -8,6 +8,9 @@ using StringTools;
 
 class SvgGenerationTest
 {
+	private static inline var RESULTS_HTML_FILE = "svg-tests.html";
+	private static inline var IMAGES_PATH = "test/images";
+
 	public function new() {	}
 
 	/**
@@ -21,14 +24,16 @@ class SvgGenerationTest
 	public function testSvgGeneration():Void
 	{
 		var testCases:Array<SvgTest> = getSvgsFromDisk();
-		var failures = generateAndCompare(testCases);
-		if (failures.length > 0) {
-			createHtmlReport(failures);
+
+		var results = generateAndCompare(testCases);
+		createHtmlReport(results);
+
+		if (results.failedTests.length > 0) {
 			var failureNames = "";
-			for (failure in failures) {
+			for (failure in results.failedTests) {
 				failureNames = '${failureNames}${failure}, ';
 			}
-			Assert.fail('SVG generation for ${failures.length} cases did not match expectations. Check svgtest.html to see failures. Images: ${failureNames}');
+			Assert.fail('SVG generation for ${results.failedTests.length} cases did not match expectations. Check ${RESULTS_HTML_FILE} to see failures. Images: ${failureNames}');
 		}
 	}
 
@@ -36,7 +41,7 @@ class SvgGenerationTest
 	private function getSvgsFromDisk() : Array<SvgTest>
 	{
 		var toReturn = new Array<SvgTest>();
-		var files = sys.FileSystem.readDirectory("test/images");
+		var files = sys.FileSystem.readDirectory(IMAGES_PATH);
 
 		for (file in files) {
 			if (file.indexOf('.svg') > -1) {
@@ -53,15 +58,47 @@ class SvgGenerationTest
 	}
 
 	// Returns a list of failures
-	private function generateAndCompare(svgTests:Array<SvgTest>) : Array<String>
+	private function generateAndCompare(svgTests:Array<SvgTest>) : GenerationResults
 	{
-		return new Array<String>();
+		// TODO: actual comparison. For now, everything "passes"!
+		var passedTests = svgTests;
+		var toReturn = new GenerationResults(passedTests, new Array<SvgTest>());
+		return toReturn;
 	}
 
 	// Creates the HTML report
-	private function createHtmlReport(failedTests:Array<String>)
+	private function createHtmlReport(results:GenerationResults)
 	{
+		var html:String = '<html><head><title>${results.failedTests.length} failures | SVG Generation Tests</title></head><body>';
 
+		// TODO: beautify.
+		var total = results.failedTests.length + results.passedTests.length;
+		// Failures first, because we care about fixing those
+		html += createTableFor(results.failedTests, "Failures");
+		html += createTableFor(results.passedTests, "Successes");
+
+		html = '${html}</body></html>';
+
+		if (sys.FileSystem.exists(RESULTS_HTML_FILE)) {
+			sys.FileSystem.deleteFile(RESULTS_HTML_FILE);
+		}
+		sys.io.File.saveContent(RESULTS_HTML_FILE, html);
+	}
+	private function createTableFor(tests:Array<SvgTest>, header:String) : String
+	{
+		var html:String = '<h1>${tests.length} ${header}</h1>';
+		html += "<table><tr><th>Image File</th><th>Expected</th><th>Actual</th>";
+
+		for (test in tests) {
+			var pngFile = test.fileName.replace('.svg', '.png');
+			html += '<tr>
+				<td>${test.fileName}</td>
+				<td><img width="128" height="128" src="${IMAGES_PATH}/${pngFile}" /></td>
+				<td><img src="${IMAGES_PATH}/${test.fileName}" /></td>
+			</tr>';
+		}
+		html += "</table>";
+		return html;
 	}
 }
 
@@ -70,7 +107,6 @@ class SvgGenerationTest
 */
 class SvgTest
 {
-
 	// SVG filename, with extension (eg. sun.svg)
 	public var fileName(default, default):String;
 	public var expectedWidth(default, default):Int;
@@ -81,5 +117,17 @@ class SvgTest
 		this.fileName = fileName;
 		this.expectedWidth = width;
 		this.expectedHeight = height;
+	}
+}
+
+class GenerationResults
+{
+	public var passedTests(default, null):Array<SvgTest>;
+	public var failedTests(default, null):Array<SvgTest>;
+
+	public function new(passedTests:Array<SvgTest>, failedTests:Array<SvgTest>)
+	{
+		this.passedTests = passedTests;
+		this.failedTests = failedTests;
 	}
 }
