@@ -10,6 +10,7 @@ class SvgGenerationTest
 {
 	private static inline var RESULTS_HTML_FILE = "svg-tests.html";
 	private static inline var IMAGES_PATH = "test/images";
+	private static inline var GENERATED_IMAGES_PATH = "generated";
 
 	public function new() {	}
 
@@ -31,7 +32,7 @@ class SvgGenerationTest
 		if (results.failedTests.length > 0) {
 			var failureNames = "";
 			for (failure in results.failedTests) {
-				failureNames = '${failureNames}${failure}, ';
+				failureNames = '${failureNames}${failure.fileName}, ';
 			}
 			Assert.fail('SVG generation for ${results.failedTests.length} cases did not match expectations. Check ${RESULTS_HTML_FILE} to see failures. Images: ${failureNames}');
 		}
@@ -60,9 +61,41 @@ class SvgGenerationTest
 	// Returns a list of failures
 	private function generateAndCompare(svgTests:Array<SvgTest>) : GenerationResults
 	{
-		// TODO: actual comparison. For now, everything "passes"!
-		var passedTests = svgTests;
-		var toReturn = new GenerationResults(passedTests, new Array<SvgTest>());
+		// Delete generated images path (if it exists)
+		if (sys.FileSystem.exists(GENERATED_IMAGES_PATH)) {
+			for (file in sys.FileSystem.readDirectory(GENERATED_IMAGES_PATH)) {
+				sys.FileSystem.deleteFile('${GENERATED_IMAGES_PATH}/${file}');
+			}
+		} else {
+			sys.FileSystem.createDirectory(GENERATED_IMAGES_PATH);
+		}
+
+		var passedTests = new Array<SvgTest>();
+		var failedTests = new Array<SvgTest>();
+
+		for (test in svgTests) {
+			// Generate the SVG
+			/*
+			var svg:SVG = new SVG(Assets.getText(test.fileName));
+	    var shape:Shape  = new Shape();
+	    svg.render(shape.graphics, 0, 0, test.expectedWidth, test.expectedHeight);
+			*/
+			var actualFile = '${GENERATED_IMAGES_PATH}/${test.fileName.replace(".svg", ".png")}';
+			// TODO: render to a PNG file ...
+			sys.io.File.saveBytes(actualFile, haxe.io.Bytes.ofString("DUMMY STRING"));
+
+			// Compare expected and actual
+			var expectedHash = haxe.crypto.Md5.make(sys.io.File.getBytes('${IMAGES_PATH}/${test.fileName}'));
+			var actualHash = haxe.crypto.Md5.make(sys.io.File.getBytes(actualFile));
+
+			// TODO: build in some tolerance for slight mis-matches
+			if (expectedHash != actualHash) {
+				failedTests.push(test);
+			} else {
+				passedTests.push(test);
+			}
+		}
+		var toReturn = new GenerationResults(passedTests, failedTests);
 		return toReturn;
 	}
 
@@ -71,7 +104,7 @@ class SvgGenerationTest
 	{
 		var html:String = '<html><head><title>${results.failedTests.length} failures | SVG Generation Tests</title></head><body>';
 
-		// TODO: beautify.
+		// TODO: beautify HTML.
 		var total = results.failedTests.length + results.passedTests.length;
 		// Failures first, because we care about fixing those
 		html += createTableFor(results.failedTests, "Failures");
@@ -84,6 +117,7 @@ class SvgGenerationTest
 		}
 		sys.io.File.saveContent(RESULTS_HTML_FILE, html);
 	}
+
 	private function createTableFor(tests:Array<SvgTest>, header:String) : String
 	{
 		var html:String = '<h1>${tests.length} ${header}</h1>';
