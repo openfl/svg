@@ -4,6 +4,8 @@ import massive.munit.util.Timer;
 import massive.munit.Assert;
 import massive.munit.async.AsyncFactory;
 
+using StringTools;
+
 class SvgGenerationTest
 {
 	public function new() {	}
@@ -19,28 +21,45 @@ class SvgGenerationTest
 	public function testSvgGeneration():Void
 	{
 		var testCases:Array<SvgTest> = getSvgsFromDisk();
-		var results = generateAndCompare(testCases);
-		createHtmlReport(results);
-		if (results.failures.length > 0) {
+		var failures = generateAndCompare(testCases);
+		if (failures.length > 0) {
+			createHtmlReport(failures);
 			var failureNames = "";
-			for (failure in results.failures) {
+			for (failure in failures) {
 				failureNames = '${failureNames}${failure}, ';
 			}
-			Assert.fail('SVG generation for ${results.failures.length} cases did not match expectations. Check svgtest.html to see failures. Images: ${failureNames}');
+			Assert.fail('SVG generation for ${failures.length} cases did not match expectations. Check svgtest.html to see failures. Images: ${failureNames}');
 		}
 	}
 
+	// Returns a list of test cases
 	private function getSvgsFromDisk() : Array<SvgTest>
 	{
-		return new Array<SvgTest>();
+		var toReturn = new Array<SvgTest>();
+		var files = sys.FileSystem.readDirectory("test/images");
+
+		for (file in files) {
+			if (file.indexOf('.svg') > -1) {
+				// Fail fast if someone added an SVG without a PNG
+				var pngFile:String = file.replace(".svg", ".png");
+				if (files.indexOf(pngFile) == -1) {
+					throw 'Found svg to test (${file}) without PNG of how it should look (${pngFile})';
+				}
+				toReturn.push(new SvgTest(file, 128, 128));
+			}
+		}
+
+		return toReturn;
 	}
 
-	private function generateAndCompare(svgTests:Array<SvgTest>) : GenerationResults
+	// Returns a list of failures
+	private function generateAndCompare(svgTests:Array<SvgTest>) : Array<String>
 	{
-		return new GenerationResults();
+		return new Array<String>();
 	}
 
-	private function createHtmlReport(results:GenerationResults)
+	// Creates the HTML report
+	private function createHtmlReport(failedTests:Array<String>)
 	{
 
 	}
@@ -62,14 +81,5 @@ class SvgTest
 		this.fileName = fileName;
 		this.expectedWidth = width;
 		this.expectedHeight = height;
-	}
-}
-
-class GenerationResults
-{
-	public var failures(default, null):Array<String>;
-
-	public function new() {
-		this.failures = new Array<String>();
 	}
 }
