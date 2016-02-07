@@ -3,6 +3,11 @@ package;
 import massive.munit.util.Timer;
 import massive.munit.Assert;
 import massive.munit.async.AsyncFactory;
+import format.SVG;
+import openfl.display.Shape;
+import openfl.display.BitmapData;
+import openfl.display.PNGEncoderOptions;
+import sys.io.File;
 
 using StringTools;
 
@@ -16,7 +21,7 @@ class SvgGenerationTest
 
 	/**
 	* Tests SVG generation. We run through a list of known (working) SVGs, generating
-	* them as (usually) 128x128 images, and comparing those to expected PNGs.
+	* them as images, and comparing those to expected PNGs.
 	* To aid troubleshooting, this test generates a generation.html file which
 	* shows both expected and actual values side-by-side, so it's easy to see what
 	* went wrong in the SVG generation.
@@ -30,11 +35,7 @@ class SvgGenerationTest
 		createHtmlReport(results);
 
 		if (results.failedTests.length > 0) {
-			var failureNames = "";
-			for (failure in results.failedTests) {
-				failureNames = '${failureNames}${failure.fileName}, ';
-			}
-			Assert.fail('SVG generation for ${results.failedTests.length} cases did not match expectations. Check ${RESULTS_HTML_FILE} to see failures. Images: ${failureNames}');
+			Assert.fail('SVG generation for ${results.failedTests.length} cases did not match expectations. Check ${RESULTS_HTML_FILE} to see failures.');
 		}
 	}
 
@@ -51,7 +52,7 @@ class SvgGenerationTest
 				if (files.indexOf(pngFile) == -1) {
 					throw 'Found svg to test (${file}) without PNG of how it should look (${pngFile})';
 				}
-				toReturn.push(new SvgTest(file, 128, 128));
+				toReturn.push(new SvgTest(file));
 			}
 		}
 
@@ -74,15 +75,22 @@ class SvgGenerationTest
 		var failedTests = new Array<SvgTest>();
 
 		for (test in svgTests) {
-			// Generate the SVG
-			/*
-			var svg:SVG = new SVG(Assets.getText(test.fileName));
-	    var shape:Shape  = new Shape();
-	    svg.render(shape.graphics, 0, 0, test.expectedWidth, test.expectedHeight);
-			*/
+			// Generate the SVG (starts here)
+			var svg = new SVG (File.getContent('${IMAGES_PATH}/${test.fileName}'));
+
 			var actualFile = '${GENERATED_IMAGES_PATH}/${test.fileName.replace(".svg", ".png")}';
-			// TODO: render to a PNG file ...
-			sys.io.File.saveBytes(actualFile, haxe.io.Bytes.ofString("DUMMY STRING"));
+			var width = Math.round(svg.data.width);
+			var height = Math.round(svg.data.height);
+
+			var backgroundColor = 0x00FFFFFF;
+			var shape = new Shape ();
+			svg.render(shape.graphics, 0, 0, width, height);
+
+			var bitmapData = new BitmapData(width, height, true, backgroundColor);
+			bitmapData.draw(shape);
+
+			File.saveBytes (actualFile, bitmapData.encode(bitmapData.rect, new PNGEncoderOptions()));
+			// Generate the SVG (ends here)
 
 			// Compare expected and actual
 			var expectedHash = haxe.crypto.Md5.make(sys.io.File.getBytes('${IMAGES_PATH}/${test.fileName}'));
@@ -102,7 +110,9 @@ class SvgGenerationTest
 	// Creates the HTML report
 	private function createHtmlReport(results:GenerationResults)
 	{
-		var html:String = '<html><head><title>${results.failedTests.length} failures | SVG Generation Tests</title></head><body>';
+		var html:String = '<html><head>
+		<title>${results.failedTests.length} failures | SVG Generation Tests</title>
+		</head><body style="background-color: #eee">';
 
 		// TODO: beautify HTML.
 		var total = results.failedTests.length + results.passedTests.length;
@@ -121,14 +131,19 @@ class SvgGenerationTest
 	private function createTableFor(tests:Array<SvgTest>, header:String) : String
 	{
 		var html:String = '<h1>${tests.length} ${header}</h1>';
-		html += "<table><tr><th>Image File</th><th>Expected</th><th>Actual</th>";
+		html += "<table><tr>
+			<th>Image File</th>
+			<th>Source Image (SVG)</th>
+			<th>Expected (PNG)</th>
+			<th>Actual (PNG)</th>";
 
 		for (test in tests) {
 			var pngFile = test.fileName.replace('.svg', '.png');
 			html += '<tr>
-				<td>${test.fileName}</td>
-				<td><img width="128" height="128" src="${IMAGES_PATH}/${pngFile}" /></td>
+				<td><a href="${IMAGES_PATH}/${test.fileName}">${test.fileName}</a></td>
 				<td><img src="${IMAGES_PATH}/${test.fileName}" /></td>
+				<td><img src="${IMAGES_PATH}/${pngFile}" /></td>
+				<td><img src="${GENERATED_IMAGES_PATH}/${pngFile}" /></td>
 			</tr>';
 		}
 		html += "</table>";
@@ -143,14 +158,10 @@ class SvgTest
 {
 	// SVG filename, with extension (eg. sun.svg)
 	public var fileName(default, default):String;
-	public var expectedWidth(default, default):Int;
-	public var expectedHeight(default, default):Int;
 
-	public function new(fileName:String, width:Int, height:Int)
+	public function new(fileName:String)
 	{
 		this.fileName = fileName;
-		this.expectedWidth = width;
-		this.expectedHeight = height;
 	}
 }
 
