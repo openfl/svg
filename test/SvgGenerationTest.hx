@@ -14,10 +14,15 @@ using StringTools;
 
 class SvgGenerationTest
 {
-	private static inline var RESULTS_HTML_FILE = "svg-tests.html";
-	private static inline var IMAGES_PATH = "test/images";
-	private static inline var GENERATED_IMAGES_PATH = "generated";
-
+	private static inline var RESULTS_HTML_FILE:String = "svg-tests.html";
+	private static inline var IMAGES_PATH:String = "test/images";
+	private static inline var GENERATED_IMAGES_PATH:String = "generated";
+    // Maximum size we render the expected image to
+    private static inline var MAX_IMAGE_SIZE:Int = 256;
+    // Percentage difference allowable between expected/actual images
+    // Ranges from 0 to 1 (0.1 = 10% diff)
+    private static inline var SVG_DIFF_TOLERANCE_PERCENT:Float = 0.1;
+    
 	public function new() {	}
 
 	/**
@@ -81,33 +86,45 @@ class SvgGenerationTest
 			var svg = new SVG(File.getContent('${IMAGES_PATH}/${test.fileName}'));
 			var outputFile = '${GENERATED_IMAGES_PATH}/${test.fileName.replace(".svg", ".png")}';
 
-			// Render to the size of the PNG image representing our "expected" value
-			// We can't easily load the image and get the size, so instead, we pull
-			// size data from render_size.txt. For more details, see the SvgTest constructor.
-			var width:Int = test.expectedWidth; //Math.round(svg.data.width);
-			var height:Int = test.expectedHeight; //Math.round(svg.data.height);
+			// Render to the size of the PNG image representing our "expected" value.
+            // We want to test rendering properly. So we render to the smaller of the
+            // SVG size and 256x256.
+			var width:Int = Math.round(svg.data.width);
+            if (width > 256)
+            {
+                width = 256;
+            }
+                        
+			var height:Int = Math.round(svg.data.height);
+            if (height > 256)
+            {
+                height = 256;
+            }
 
 			var backgroundColor = 0x00FFFFFF;
-			var shape = new Shape ();
+			var shape = new Shape();
+            // scale/render the SVG to this size
 			svg.render(shape.graphics, 0, 0, width, height);
 
-			var bitmapData = new BitmapData(width, height, true, backgroundColor);
-			bitmapData.draw(shape);
+            // generated image size
+			var actualBitmapData = new BitmapData(width, height, true, backgroundColor);
+			actualBitmapData.draw(shape);
 
-			File.saveBytes(outputFile, bitmapData.encode(bitmapData.rect, new PNGEncoderOptions()));
+			File.saveBytes(outputFile, actualBitmapData.encode(actualBitmapData.rect, new PNGEncoderOptions()));
 			// Generate the SVG (ends here)
 
-			// Compare expected and actual
-			var expectedHash = haxe.crypto.Md5.encode(sys.io.File.getContent('${IMAGES_PATH}/${test.fileName}'));
-			var actualHash = haxe.crypto.Md5.encode(sys.io.File.getContent(outputFile));
-
-			test.expectedHash = expectedHash;
-			test.actualHash = actualHash;
+            var expectedBitmapData:BitmapData = BitmapData.fromFile('${IMAGES_PATH}/${test.fileName}');
+            
+			var diffPercentage = diffImages(expectedBitmapData, actualBitmapData);
+            test.diffPercentage = diffPercentage;
 
 			// TODO: build in some tolerance for slight mis-matches
-			if (expectedHash != actualHash) {
+			if (diffPercentage >= SVG_DIFF_TOLERANCE_PERCENT)
+            {
 				failedTests.push(test);
-			} else {
+			}
+            else
+            {
 				passedTests.push(test);
 			}
 		}
@@ -142,7 +159,9 @@ class SvgGenerationTest
 		html += "<table><tr>
 			<th>Source Image (SVG)</th>
 			<th>Expected (PNG)</th>
-			<th>Actual (PNG)</th>";
+			<th>Actual (PNG)</th>
+            <th>Diff Percentage</th>";
+            
 
 		for (test in tests) {
 			var pngFile = test.fileName.replace('.svg', '.png');
@@ -150,11 +169,17 @@ class SvgGenerationTest
 				<td><img src="${IMAGES_PATH}/${test.fileName}" width="${test.expectedWidth}" height="${test.expectedHeight}" /><br /></td>
 				<td><img src="${IMAGES_PATH}/${pngFile}" /></td>
 				<td><img src="${GENERATED_IMAGES_PATH}/${pngFile}" /></td>
+                <td>${test.diffPercentage * 100}%</td>
 			</tr>';
 		}
 		html += "</table>";
 		return html;
 	}
+    
+    private function diffImages(expected:BitmapData, actual:BitmapData):Float
+    {
+        return 1;
+    }
 }
 
 /**
@@ -166,29 +191,13 @@ class SvgTest
 	public var fileName(default, default):String;
 	public var expectedWidth(default, default):Int;
 	public var expectedHeight(default, default):Int;
-
-	public var expectedHash(default, default):String;
-	public var actualHash(default, default):String;
+	public var diffPercentage(default, default):Float;
 
 	private static var renderSizes:String;
 
-	// By default, assumes every test case should render at 256x256
-	// If there's an entry for the SVG file in render_size.txt, that size is used.
 	public function new(fileName:String)
 	{
-		if (renderSizes == null) {
-			renderSizes = File.getContent('test/render_size.txt');
-		}
-
 		this.fileName = fileName;
-		var regex = new EReg('${fileName}: (\\d+)x(\\d+)', "i");
-		if (regex.match(renderSizes)) {
-			this.expectedWidth = Std.parseInt(regex.matched(1));
-			this.expectedHeight = Std.parseInt(regex.matched(2));
-		} else {
-			this.expectedWidth = 256;
-			this.expectedHeight = 256;
-		}
 	}
 }
 
