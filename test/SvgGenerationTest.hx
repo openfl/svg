@@ -3,12 +3,15 @@ package;
 import massive.munit.util.Timer;
 import massive.munit.Assert;
 import massive.munit.async.AsyncFactory;
+
+import format.SVG;
 import openfl.display.Shape;
 import openfl.display.PNGEncoderOptions;
 import openfl.display.BitmapData;
 import openfl.display.Bitmap;
+import openfl.Assets;
+
 import sys.io.File;
-import format.SVG;
 
 using StringTools;
 
@@ -59,7 +62,7 @@ class SvgGenerationTest
 				if (files.indexOf(pngFile) == -1) {
 					throw 'Found svg to test (${file}) without PNG of how it should look (${pngFile})';
 				}
-				toReturn.push(new SvgTest(file));
+				toReturn.push(newSvgTest(file));
 			}
 		}
 
@@ -113,22 +116,54 @@ class SvgGenerationTest
 			File.saveBytes(outputFile, actualBitmapData.encode(actualBitmapData.rect, new PNGEncoderOptions()));
 			// Generate the SVG (ends here)
 
-            var expectedBitmapData:BitmapData = BitmapData.fromFile('${IMAGES_PATH}/${test.fileName}');
+            var expectedImage:String = '${IMAGES_PATH}/${test.fileName.replace(".svg", ".png")}';
+            var expectedBitmapData:BitmapData = BitmapData.fromFile(expectedImage);
             
-			var diffPercentage = diffImages(expectedBitmapData, actualBitmapData);
-            test.diffPercentage = diffPercentage;
-
-			// TODO: build in some tolerance for slight mis-matches
-			if (diffPercentage >= SVG_DIFF_TOLERANCE_PERCENT)
+			if (expectedBitmapData.width != actualBitmapData.width || expectedBitmapData.height != actualBitmapData.height)
             {
 				failedTests.push(test);
-			}
+            }
             else
             {
-				passedTests.push(test);
-			}
+                // Calculate the average actual-value pixel diff from the expected-value pixel
+                // Since we're averaging across the entire image, even if a few pixels are
+                // drastically different, if the overall images are similar, we get a small diff.
+                var diffPixels:BitmapData = actualBitmapData.compare(expectedBitmapData);
+                var culmulativeDiff:Float = 0;
+                for (y in 0 ... diffPixels.height)
+                {
+                    for (x in 0 ... diffPixels.width)
+                    {
+                        var expectedPixel = getComponents(expectedBitmapData.getPixel32(x, y));
+                        var actualPixel = getComponents(actualBitmapData.getPixel32(x, y));
+                        
+                        var redDiff:Float = Math.abs(expectedPixel[0] - actualPixel[0]) / 255.0;
+                        var greenDiff:Float = Math.abs(expectedPixel[1] - actualPixel[1]) / 255.0;
+                        var blueDiff:Float = Math.abs(expectedPixel[2] - actualPixel[2]) / 255.0;
+                        var alphaDiff:Float = Math.abs(expectedPixel[3] - actualPixel[3]) / 255.0;
+                        
+                        // Average of RGBA diffs
+                        var percentDiff = (redDiff + greenDiff + blueDiff + alphaDiff) / 4;
+                        culmulativeDiff += percentDiff;
+                    }
+                }
+                
+                test.diffPixels = diffPixels;
+                test.diffPercentage = culmulativeDiff / (width * height);
+                var diffFile:String = '${GENERATED_IMAGES_PATH}/${test.fileName.replace(".svg", "-diff.png")}';
+                File.saveBytes(diffFile, diffPixels.encode(diffPixels.rect, new PNGEncoderOptions()));                
+                
+			    if (culmulativeDiff >= SVG_DIFF_TOLERANCE_PERCENT)
+                {
+                    passedTests.push(test);
+                }
+                else
+                {
+                    failedTests.push(test);
+                }             
+            }
 		}
-		var toReturn = new GenerationResults(passedTests, failedTests);
+		var toReturn = { passedTests: passedTests, failedTests: failedTests };
 		return toReturn;
 	}
 
@@ -157,18 +192,19 @@ class SvgGenerationTest
 	{
 		var html:String = '<h1>${tests.length} ${header}</h1>';
 		html += "<table><tr>
-			<th>Source Image (SVG)</th>
 			<th>Expected (PNG)</th>
 			<th>Actual (PNG)</th>
-            <th>Diff Percentage</th>";
+            <th>Diff Image</th>
+            <th>Average Pixel Diff %</th>";
             
 
 		for (test in tests) {
 			var pngFile = test.fileName.replace('.svg', '.png');
+			var diffFile = test.fileName.replace('.svg', '-diff.png');
 			html += '<tr>
-				<td><img src="${IMAGES_PATH}/${test.fileName}" width="${test.expectedWidth}" height="${test.expectedHeight}" /><br /></td>
 				<td><img src="${IMAGES_PATH}/${pngFile}" /></td>
 				<td><img src="${GENERATED_IMAGES_PATH}/${pngFile}" /></td>
+				<td><img src="${GENERATED_IMAGES_PATH}/${diffFile}" /></td>                
                 <td>${test.diffPercentage * 100}%</td>
 			</tr>';
 		}
@@ -176,39 +212,47 @@ class SvgGenerationTest
 		return html;
 	}
     
-    private function diffImages(expected:BitmapData, actual:BitmapData):Float
+    // Given a pixel (0xAARRGGBB), return an array [RR, GG, BB, AA]
+    // Components are integer values from 0..255
+    private function getComponents(pixel:Int):Array<Int>
     {
-        return 1;
+        // No difference (empty pixel)? Skip calculations.
+        if (pixel <= 0)
+        {
+            return [0, 0, 0, 0];
+        }
+        
+        var blue:Int = 0xFFBB8844 & 0xFF; // BB
+        var green:Int = (0xFFBB8844 >> 8) & 0xFF; // GG
+        var red:Int = (0xFFBB8844 >> 16) & 0xFF; // RR
+        var alpha:Int = (0xFFBB8844 >> 24) & 0xFF; // AA
+        var toReturn = [red, green, blue, alpha];
+        return toReturn;
+    }
+    
+    private function newSvgTest(fileName:String):SvgTest
+    {
+        return {fileName: fileName,
+            expectedWidth: 0, expectedHeight: 0,
+            diffPixels: null, diffPercentage: 0 };        
     }
 }
 
 /**
 * Encapsulates everything we need to test a single SVG
 */
-class SvgTest
+typedef SvgTest =
 {
 	// SVG filename, with extension (eg. sun.svg)
-	public var fileName(default, default):String;
-	public var expectedWidth(default, default):Int;
-	public var expectedHeight(default, default):Int;
-	public var diffPercentage(default, default):Float;
-
-	private static var renderSizes:String;
-
-	public function new(fileName:String)
-	{
-		this.fileName = fileName;
-	}
+	var fileName:String;
+	var expectedWidth:Int;
+	var expectedHeight:Int;
+    var diffPixels:BitmapData;
+	var diffPercentage:Float;
 }
 
-class GenerationResults
+typedef GenerationResults =
 {
-	public var passedTests(default, null):Array<SvgTest>;
-	public var failedTests(default, null):Array<SvgTest>;
-
-	public function new(passedTests:Array<SvgTest>, failedTests:Array<SvgTest>)
-	{
-		this.passedTests = passedTests;
-		this.failedTests = failedTests;
-	}
+	var passedTests:Array<SvgTest>;
+	var failedTests:Array<SvgTest>;
 }
