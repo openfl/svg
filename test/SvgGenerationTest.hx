@@ -94,8 +94,7 @@ class SvgGenerationTest
 			var bitmapData = new BitmapData(width, height, true, backgroundColor);
 			bitmapData.draw(shape);
 
-			trace('Saving to ${actualFile} ...');
-			File.saveBytes(actualFile, bitmapData.encode(bitmapData.rect, new PNGEncoderOptions()));
+			File.saveBytes(outputFile, bitmapData.encode(bitmapData.rect, new PNGEncoderOptions()));
 			// Generate the SVG (ends here)
 
 			// Compare expected and actual
@@ -141,7 +140,6 @@ class SvgGenerationTest
 	{
 		var html:String = '<h1>${tests.length} ${header}</h1>';
 		html += "<table><tr>
-			<th>Image File</th>
 			<th>Source Image (SVG)</th>
 			<th>Expected (PNG)</th>
 			<th>Actual (PNG)</th>";
@@ -149,10 +147,7 @@ class SvgGenerationTest
 		for (test in tests) {
 			var pngFile = test.fileName.replace('.svg', '.png');
 			html += '<tr>
-				<td><a href="${IMAGES_PATH}/${test.fileName}">${test.fileName}</a></td>
 				<td><img src="${IMAGES_PATH}/${test.fileName}" width="${test.expectedWidth}" height="${test.expectedHeight}" /><br /></td>
-				<td><img src="${IMAGES_PATH}/${pngFile}" /><br />${test.expectedHash}</td>
-				<td><img src="${GENERATED_IMAGES_PATH}/${pngFile}" /><br />${test.actualHash}</td>
 				<td><img src="${IMAGES_PATH}/${pngFile}" /></td>
 				<td><img src="${GENERATED_IMAGES_PATH}/${pngFile}" /></td>
 			</tr>';
