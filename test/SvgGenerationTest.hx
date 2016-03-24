@@ -3,29 +3,21 @@ package;
 import massive.munit.util.Timer;
 import massive.munit.Assert;
 import massive.munit.async.AsyncFactory;
-<<<<<<< HEAD
 
 import format.SVG;
-=======
->>>>>>> 697633feec7af2c452dc91db80e078b3e9bac541
+
 import openfl.display.Shape;
 import openfl.display.PNGEncoderOptions;
 import openfl.display.BitmapData;
 import openfl.display.Bitmap;
-<<<<<<< HEAD
 import openfl.Assets;
 
 import sys.io.File;
-=======
-import sys.io.File;
-import format.SVG;
->>>>>>> 697633feec7af2c452dc91db80e078b3e9bac541
 
 using StringTools;
 
 class SvgGenerationTest
 {
-<<<<<<< HEAD
 	private static inline var RESULTS_HTML_FILE:String = "svg-tests.html";
 	private static inline var IMAGES_PATH:String = "test/images";
 	private static inline var GENERATED_IMAGES_PATH:String = "generated";
@@ -35,12 +27,6 @@ class SvgGenerationTest
     // Ranges from 0 to 1 (0.1 = 10% diff)
     private static inline var SVG_DIFF_TOLERANCE_PERCENT:Float = 0.01;
     
-=======
-	private static inline var RESULTS_HTML_FILE = "svg-tests.html";
-	private static inline var IMAGES_PATH = "test/images";
-	private static inline var GENERATED_IMAGES_PATH = "generated";
-
->>>>>>> 697633feec7af2c452dc91db80e078b3e9bac541
 	public function new() {	}
 
 	/**
@@ -77,11 +63,7 @@ class SvgGenerationTest
 				if (files.indexOf(pngFile) == -1) {
 					throw 'Found svg to test (${file}) without PNG of how it should look (${pngFile})';
 				}
-<<<<<<< HEAD
 				toReturn.push(newSvgTest(file));
-=======
-				toReturn.push(new SvgTest(file));
->>>>>>> 697633feec7af2c452dc91db80e078b3e9bac541
 			}
 		}
 
@@ -108,7 +90,6 @@ class SvgGenerationTest
 			var svg = new SVG(File.getContent('${IMAGES_PATH}/${test.fileName}'));
 			var outputFile = '${GENERATED_IMAGES_PATH}/${test.fileName.replace(".svg", ".png")}';
 
-<<<<<<< HEAD
 			// Render to the size of the PNG image representing our "expected" value.
             // We want to test rendering properly. So we render to the smaller of the
             // SVG size and 256x256.
@@ -207,41 +188,6 @@ class SvgGenerationTest
         var percentDiff = (redDiff + greenDiff + blueDiff + alphaDiff) / 4;
         return percentDiff;
     }
-=======
-			// Render to the size of the PNG image representing our "expected" value
-			// We can't easily load the image and get the size, so instead, we pull
-			// size data from render_size.txt. For more details, see the SvgTest constructor.
-			var width:Int = test.expectedWidth; //Math.round(svg.data.width);
-			var height:Int = test.expectedHeight; //Math.round(svg.data.height);
-
-			var backgroundColor = 0x00FFFFFF;
-			var shape = new Shape ();
-			svg.render(shape.graphics, 0, 0, width, height);
-
-			var bitmapData = new BitmapData(width, height, true, backgroundColor);
-			bitmapData.draw(shape);
-
-			File.saveBytes(outputFile, bitmapData.encode(bitmapData.rect, new PNGEncoderOptions()));
-			// Generate the SVG (ends here)
-
-			// Compare expected and actual
-			var expectedHash = haxe.crypto.Md5.encode(sys.io.File.getContent('${IMAGES_PATH}/${test.fileName}'));
-			var actualHash = haxe.crypto.Md5.encode(sys.io.File.getContent(outputFile));
-
-			test.expectedHash = expectedHash;
-			test.actualHash = actualHash;
-
-			// TODO: build in some tolerance for slight mis-matches
-			if (expectedHash != actualHash) {
-				failedTests.push(test);
-			} else {
-				passedTests.push(test);
-			}
-		}
-		var toReturn = new GenerationResults(passedTests, failedTests);
-		return toReturn;
-	}
->>>>>>> 697633feec7af2c452dc91db80e078b3e9bac541
 
 	// Creates the HTML report
 	private function createHtmlReport(results:GenerationResults)
@@ -268,7 +214,6 @@ class SvgGenerationTest
 	{
 		var html:String = '<h1>${tests.length} ${header}</h1>';
 		html += "<table><tr>
-<<<<<<< HEAD
 			<th>Expected (PNG)</th>
 			<th>Actual (PNG)</th>
             <th>Diff Image</th>
@@ -283,26 +228,11 @@ class SvgGenerationTest
 				<td><img src="${GENERATED_IMAGES_PATH}/${pngFile}" /></td>
 				<td><img src="${GENERATED_IMAGES_PATH}/${diffFile}" /></td>                
                 <td>${test.diffPercentage * 100}%</td>
-=======
-			<th>Image File</th>
-			<th>Source Image (SVG)</th>
-			<th>Expected (PNG)</th>
-			<th>Actual (PNG)</th>";
-
-		for (test in tests) {
-			var pngFile = test.fileName.replace('.svg', '.png');
-			html += '<tr>
-				<td><a href="${IMAGES_PATH}/${test.fileName}">${test.fileName}</a></td>
-				<td><img src="${IMAGES_PATH}/${test.fileName}" width="${test.expectedWidth}" height="${test.expectedHeight}" /><br /></td>
-				<td><img src="${IMAGES_PATH}/${pngFile}" /><br />${test.expectedHash}</td>
-				<td><img src="${GENERATED_IMAGES_PATH}/${pngFile}" /><br />${test.actualHash}</td>
->>>>>>> 697633feec7af2c452dc91db80e078b3e9bac541
 			</tr>';
 		}
 		html += "</table>";
 		return html;
 	}
-<<<<<<< HEAD
     
     // Given a pixel (0xAARRGGBB), return an array [RR, GG, BB, AA]
     // Components are integer values from 0..255
@@ -328,14 +258,11 @@ class SvgGenerationTest
             expectedWidth: 0, expectedHeight: 0,
             diffPixels: null, diffPercentage: 0 };        
     }
-=======
->>>>>>> 697633feec7af2c452dc91db80e078b3e9bac541
 }
 
 /**
 * Encapsulates everything we need to test a single SVG
 */
-<<<<<<< HEAD
 typedef SvgTest =
 {
 	// SVG filename, with extension (eg. sun.svg)
@@ -350,48 +277,4 @@ typedef GenerationResults =
 {
 	var passedTests:Array<SvgTest>;
 	var failedTests:Array<SvgTest>;
-=======
-class SvgTest
-{
-	// SVG filename, with extension (eg. sun.svg)
-	public var fileName(default, default):String;
-	public var expectedWidth(default, default):Int;
-	public var expectedHeight(default, default):Int;
-
-	public var expectedHash(default, default):String;
-	public var actualHash(default, default):String;
-
-	private static var renderSizes:String;
-
-	// By default, assumes every test case should render at 256x256
-	// If there's an entry for the SVG file in render_size.txt, that size is used.
-	public function new(fileName:String)
-	{
-		if (renderSizes == null) {
-			renderSizes = File.getContent('test/render_size.txt');
-		}
-
-		this.fileName = fileName;
-		var regex = new EReg('${fileName}: (\\d+)x(\\d+)', "i");
-		if (regex.match(renderSizes)) {
-			this.expectedWidth = Std.parseInt(regex.matched(1));
-			this.expectedHeight = Std.parseInt(regex.matched(2));
-		} else {
-			this.expectedWidth = 256;
-			this.expectedHeight = 256;
-		}
-	}
-}
-
-class GenerationResults
-{
-	public var passedTests(default, null):Array<SvgTest>;
-	public var failedTests(default, null):Array<SvgTest>;
-
-	public function new(passedTests:Array<SvgTest>, failedTests:Array<SvgTest>)
-	{
-		this.passedTests = passedTests;
-		this.failedTests = failedTests;
-	}
->>>>>>> 697633feec7af2c452dc91db80e078b3e9bac541
 }
