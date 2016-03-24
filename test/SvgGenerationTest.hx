@@ -24,7 +24,7 @@ class SvgGenerationTest
     private static inline var MAX_IMAGE_SIZE:Int = 256;
     // Percentage difference allowable between expected/actual images
     // Ranges from 0 to 1 (0.1 = 10% diff)
-    private static inline var SVG_DIFF_TOLERANCE_PERCENT:Float = 0.1;
+    private static inline var SVG_DIFF_TOLERANCE_PERCENT:Float = 0.01;
     
 	public function new() {	}
 
@@ -137,35 +137,56 @@ class SvgGenerationTest
                         var expectedPixel = getComponents(expectedBitmapData.getPixel32(x, y));
                         var actualPixel = getComponents(actualBitmapData.getPixel32(x, y));
                         
-                        var redDiff:Float = Math.abs(expectedPixel[0] - actualPixel[0]) / 255.0;
-                        var greenDiff:Float = Math.abs(expectedPixel[1] - actualPixel[1]) / 255.0;
-                        var blueDiff:Float = Math.abs(expectedPixel[2] - actualPixel[2]) / 255.0;
-                        var alphaDiff:Float = Math.abs(expectedPixel[3] - actualPixel[3]) / 255.0;
-                        
-                        // Average of RGBA diffs
-                        var percentDiff = (redDiff + greenDiff + blueDiff + alphaDiff) / 4;
+                        var percentDiff = diffPixelsRgba(expectedPixel, actualPixel);
                         culmulativeDiff += percentDiff;
                     }
                 }
                 
+                // Average over all pixels
+                culmulativeDiff = culmulativeDiff / (width * height);
                 test.diffPixels = diffPixels;
-                test.diffPercentage = culmulativeDiff / (width * height);
+                test.diffPercentage = culmulativeDiff;
                 var diffFile:String = '${GENERATED_IMAGES_PATH}/${test.fileName.replace(".svg", "-diff.png")}';
                 File.saveBytes(diffFile, diffPixels.encode(diffPixels.rect, new PNGEncoderOptions()));                
                 
 			    if (culmulativeDiff >= SVG_DIFF_TOLERANCE_PERCENT)
                 {
-                    passedTests.push(test);
+                    failedTests.push(test);
                 }
                 else
                 {
-                    failedTests.push(test);
+                    passedTests.push(test);
                 }             
             }
 		}
 		var toReturn = { passedTests: passedTests, failedTests: failedTests };
 		return toReturn;
 	}
+    
+    // Given expected/actual pixels, calculate the RGBA diff as a percentage of
+    // deviation from the expected pixel.
+    // Eg. if a pixel's expected red value is 255 and actual is 64, return 0.75 (191/255).
+    // The input is the array [r, g, b, a] with values from 0..255
+    private function diffPixelsRgba(expectedPixel:Array<Int>, actualPixel:Array<Int>):Float
+    {
+        // Special case: if expected or actual are [0, 0, 0, 0] but the other isn't, return 100%
+        // Usually, all four components are zero. But we don't check, because it makes the if
+        // statement very, very tedious to read.
+        var expectedIsZero = expectedPixel[3] == 0;
+        var actualIsZero = actualPixel[3] == 0;
+        if ((expectedIsZero || actualIsZero) && !(expectedIsZero && actualIsZero))
+        {
+            return 1;
+        }
+        var redDiff:Float = Math.abs(expectedPixel[0] - actualPixel[0]) / 255.0;
+        var greenDiff:Float = Math.abs(expectedPixel[1] - actualPixel[1]) / 255.0;
+        var blueDiff:Float = Math.abs(expectedPixel[2] - actualPixel[2]) / 255.0;
+        var alphaDiff:Float = Math.abs(expectedPixel[3] - actualPixel[3]) / 255.0;
+        
+        // Average of RGBA diffs
+        var percentDiff = (redDiff + greenDiff + blueDiff + alphaDiff) / 4;
+        return percentDiff;
+    }
 
 	// Creates the HTML report
 	private function createHtmlReport(results:GenerationResults)
