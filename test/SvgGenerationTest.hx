@@ -25,7 +25,7 @@ class SvgGenerationTest
     private static inline var MAX_IMAGE_SIZE:Int = 256;
     // Percentage difference allowable between expected/actual images
     // Ranges from 0 to 1 (0.1 = 10% diff)
-    private static inline var SVG_DIFF_TOLERANCE_PERCENT:Float = 0.01; // 1%
+    private static inline var SVG_DIFF_TOLERANCE_PERCENT:Float = 0.05;
     
 	public function new() {	}
 

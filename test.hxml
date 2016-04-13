@@ -1,4 +1,3 @@
-## Neko
 -main TestMain
 -lib munit
 -lib hamcrest
@@ -7,7 +6,9 @@
 
 -cp src
 -cp test
--neko build/neko_test.n
 -D lime
 -D lime_cairo
 --remap flash:openfl
+
+## Neko
+-cmd neko build/neko_test.n
