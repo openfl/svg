@@ -25,7 +25,8 @@ class SvgGenerationTest
     private static inline var MAX_IMAGE_SIZE:Int = 256;
     // Percentage difference allowable between expected/actual images
     // Ranges from 0 to 1 (0.1 = 10% diff)
-    private static inline var SVG_DIFF_TOLERANCE_PERCENT:Float = 0.05;
+    // Currently at 15% because anti-aliasing artifacts on small images makes a big difference
+    private static inline var SVG_DIFF_TOLERANCE_PERCENT:Float = 0.15;
     
 	public function new() {	}
 
@@ -126,31 +127,36 @@ class SvgGenerationTest
             }
             else
             {
-                // Calculate the average actual-value pixel diff from the expected-value pixel
+                // Calculate the number of pixels that are different from what they should be.
                 // Since we're averaging across the entire image, even if a few pixels are
                 // drastically different, if the overall images are similar, we get a small diff.
-                
-                // The diff pixel has one non-transparent pixel for every pixel that differs.
+                // We use BitmapData.compare to generate the "diff image" between two images.
+                // The diff image has one non-transparent pixel for every pixel that differs.
                 // Because of the way it calculates transparency, the safest way to know if
-                // there's a diff is to get the pixel RGB values (not RGBA) and average them.
-                // To see how this diff image works, just replace any SVG with a coloured rectangle 
-                // and re-run the tests.
+                // there's a diff is to get the pixel RGB values (not RGBA).
+                // To see how this diff image works, just replace any SVG with a coloured rectangle and re-run the tests.
                 var diffPixels:BitmapData = actualBitmapData.compare(expectedBitmapData);
-                var culmulativeDiff:Float = 0;
+                var numPixelsThatAreDifferent:Int = 0;
+                
                 for (y in 0 ... diffPixels.height)
                 {
                     for (x in 0 ... diffPixels.width)
                     {
                         var diffPixel = diffPixels.getPixel(x, y);
-                        // Average RGB values
+                        // Extract RGB values
                         var components = getComponents(diffPixel);
-                        var percentDiff = (components[0] + components[1] + components[2]) / (255+255+255);
-                        culmulativeDiff += percentDiff;
+                        var red = components[0];
+                        var green = components[1];
+                        var blue = components[2];
+                        if (red > 0 || green > 0 || blue > 0)
+                        {
+                            numPixelsThatAreDifferent++;                        
+                        }                        
                     }
                 }
                 
                 // Average over all pixels in the image
-                culmulativeDiff = culmulativeDiff / (width * height);
+                var culmulativeDiff:Float = numPixelsThatAreDifferent / (width * height);
                 test.diffPixels = diffPixels;
                 test.diffPercentage = culmulativeDiff;
                 var diffFile:String = '${GENERATED_IMAGES_PATH}/${test.fileName.replace(".svg", "-diff.png")}';
