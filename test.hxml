@@ -12,3 +12,4 @@
 
 ## Neko
 -neko build/neko_test.n
+-cmd "neko build/neko_test.n"
