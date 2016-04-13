@@ -11,4 +11,4 @@
 --remap flash:openfl
 
 ## Neko
--cmd neko build/neko_test.n
+-neko build/neko_test.n
