@@ -1,0 +1,15 @@
+-main TestMain
+-lib munit
+-lib hamcrest
+-lib openfl
+-lib lime
+
+-cp src
+-cp test
+-D lime
+-D lime_cairo
+--remap flash:openfl
+
+## Neko
+-neko build/neko_test.n
+-cmd "neko build/neko_test.n"
