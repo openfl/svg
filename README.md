@@ -61,3 +61,11 @@ Tell haxelib where your development copy of SVG is installed:
 To return to release builds:
 
     haxelib dev svg
+
+
+Running SVG's Tests
+===================
+
+`svg` includes `munit` tests which generate images for a set of SVGs and compare them against known, "good" generated images to see how different they are. The test fails if any of the images are too different.
+
+These tests run automatically with each build/commit. To run them on your local machine, just type `haxelib test.hxml`. (Note that `haxelib run munit test` won't work.)
