@@ -16,6 +16,14 @@ import sys.io.File;
 
 using StringTools;
 
+/**
+* Tests SVG generation. We run through a list of known (working) SVGs, generating
+* them as (usually 256x256, unless the source is smaller) images, and comparing
+* those to expected PNGs.
+* To aid troubleshooting, this test generates a generation.html file which
+* shows both expected and actual values side-by-side, so it's easy to see what
+* went wrong in the SVG generation.
+*/
 class SvgGenerationTest
 {
 	private static inline var RESULTS_HTML_FILE:String = "svg-tests.html";
@@ -28,53 +36,38 @@ class SvgGenerationTest
     // Currently at 15% because anti-aliasing artifacts on small images makes a big difference
     private static inline var SVG_DIFF_TOLERANCE_PERCENT:Float = 0.15;
     
+    private var results:GenerationResults;
+    
 	public function new() {	}
-
-	/**
-	* Tests SVG generation. We run through a list of known (working) SVGs, generating
-	* them as (usually 256x256, unless the source is smaller) images, and comparing
-	// those to expected PNGs.
-	* To aid troubleshooting, this test generates a generation.html file which
-	* shows both expected and actual values side-by-side, so it's easy to see what
-	* went wrong in the SVG generation.
-	*/
-	@Test
-	public function testSvgGeneration():Void
+    
+    @Test
+	public function ubuntuLogoRendersCorrectlyAt256x256()
 	{
-		var testCases:Array<SvgTest> = getSvgsFromDisk();
-
-		var results = generateAndCompare(testCases);
-		createHtmlReport(results);
-
-		if (results.failedTests.length > 0) {
-			Assert.fail('SVG generation for ${results.failedTests.length} cases did not match expectations. Check ${RESULTS_HTML_FILE} to see failures.');
-		}
+        generateAndCompare("ubuntu-logo-orange.svg", 256, 256);
 	}
-
-	// Returns a list of test cases
-	private function getSvgsFromDisk() : Array<SvgTest>
-	{
-        var toReturn = new Array<SvgTest>();
-		var files = sys.FileSystem.readDirectory(IMAGES_PATH);
-
-		for (file in files) {
-			if (file.indexOf('.svg') > -1) {
-				// Fail fast if someone added an SVG without a PNG
-				var pngFile:String = file.replace(".svg", ".png");
-				if (files.indexOf(pngFile) == -1) {
-					throw 'Found svg to test (${file}) without PNG of how it should look (${pngFile})';
-				}
-				toReturn.push(newSvgTest(file));
-			}
+    
+    @Test
+    public function allRightsReservedRendersCorrectlyAtOriginalSize()
+    {
+        // This file is a small circle; it has a lot of anti-aliasing artifacts in the diff.
+        // This might be problematic. Right now, we have a large SVG diff tolerance percentage.
+        generateAndCompare("all_rights_reserved_white.svg");
+    }    
+    
+    @BeforeClass
+    public function cleanPreviousTestRunResults() {
+        
+        this.results = {
+            passedTests: new Array<SvgTest>(), failedTests: new Array<SvgTest>()
+        };
+        
+        // Delete the old report
+        if (sys.FileSystem.exists(RESULTS_HTML_FILE))
+        {
+			sys.FileSystem.deleteFile(RESULTS_HTML_FILE);
 		}
-
-		return toReturn;
-	}
-
-	// Returns a list of failures
-	private function generateAndCompare(svgTests:Array<SvgTest>) : GenerationResults
-	{
-		// Delete generated images path (if it exists)
+        
+        // Delete generated images path (if it exists)
 		if (sys.FileSystem.exists(GENERATED_IMAGES_PATH)) {
 			for (file in sys.FileSystem.readDirectory(GENERATED_IMAGES_PATH)) {
 				sys.FileSystem.deleteFile('${GENERATED_IMAGES_PATH}/${file}');
@@ -82,143 +75,140 @@ class SvgGenerationTest
 		} else {
 			sys.FileSystem.createDirectory(GENERATED_IMAGES_PATH);
 		}
+    }
+    
+    @AfterClass
+    public function createHtmlReport() {
+        var total = results.failedTests.length + results.passedTests.length;
+        
+        var html:String = '<html><head>
+		<title>${results.failedTests.length}/${total} failures | SVG Generation Tests</title>
+		</head><body style="background-color: #eee">';        
+        
+        html += this.getReportHtml();
+                
+        html += "</body></html>";
+        
+        sys.io.File.saveContent(RESULTS_HTML_FILE, html);
+    }
+    
+    private function generateAndCompare(svgName:String, pngWidth:Int = 0, pngHeight:Int = 0)
+    {
+        generatePng(svgName, pngWidth, pngHeight);
+        compareGeneratedToExpected(svgName);
+    }
+    
+    // Generates a PNG from an SVG at the specified width/height.
+    private function generatePng(svgName:String, pngWidth:Int = 0, pngHeight:Int = 0)
+    {
+        // Generate the SVG (starts here)
+        var svg = new SVG(File.getContent('${IMAGES_PATH}/${svgName}'));
+        var outputFile = '${GENERATED_IMAGES_PATH}/${svgName.replace(".svg", ".png")}';
 
-		var passedTests = new Array<SvgTest>();
-		var failedTests = new Array<SvgTest>();
+        // Render to the size of the PNG image representing our "expected" value.
+        // If the user passed in a width/height, we use that. Otherwise, we use
+        // the original SVG height. If the image is over 256x256, we render it at 256x256
+        // (this makes it easier to see in the report).
+        var width:Int = pngWidth;
+        var height:Int = pngHeight;
+        
+        if (pngWidth == 0 || pngHeight == 0)
+        {
+            width = Math.round(svg.data.width);
+            height = Math.round(svg.data.height);
+        }
+        
+        // Scale down (proportionally).
+        if (width > 256)
+        {
+            var scale:Float = 256 / width;
+            width = 256;
+            height = Math.round(height * scale);
+        }
+        
+        if (height > 256)
+        {
+            var scale:Float = 256 / height;
+            height = 256;
+            width = Math.round(width * scale);
+        }
+        
+        // Fully-transparent and white
+        var backgroundColor = 0x00FFFFFF;
+        var shape = new Shape();
+        // scale/render the SVG to this size
+        svg.render(shape.graphics, 0, 0, width, height);
 
-		for (test in svgTests) {
-			// Generate the SVG (starts here)
-			var svg = new SVG(File.getContent('${IMAGES_PATH}/${test.fileName}'));
-			var outputFile = '${GENERATED_IMAGES_PATH}/${test.fileName.replace(".svg", ".png")}';
+        // generated image size
+        var actualBitmapData = new BitmapData(width, height, true, backgroundColor);
+        actualBitmapData.draw(shape);
 
-			// Render to the size of the PNG image representing our "expected" value.
-            // We want to test rendering properly. So we render to the smaller of the
-            // SVG size and 256x256.
-			var width:Int = Math.round(svg.data.width);
-            if (width > 256)
-            {
-                width = 256;
-            }
-                        
-			var height:Int = Math.round(svg.data.height);
-            if (height > 256)
-            {
-                height = 256;
-            }
+        File.saveBytes(outputFile, actualBitmapData.encode(actualBitmapData.rect, new PNGEncoderOptions()));
+    }
 
-			var backgroundColor = 0x00FFFFFF;
-			var shape = new Shape();
-            // scale/render the SVG to this size
-			svg.render(shape.graphics, 0, 0, width, height);
-
-            // generated image size
-			var actualBitmapData = new BitmapData(width, height, true, backgroundColor);
-			actualBitmapData.draw(shape);
-
-			File.saveBytes(outputFile, actualBitmapData.encode(actualBitmapData.rect, new PNGEncoderOptions()));
-			// Generate the SVG (ends here)
-
-            var expectedImage:String = '${IMAGES_PATH}/${test.fileName.replace(".svg", ".png")}';
-            var expectedBitmapData:BitmapData = BitmapData.fromFile(expectedImage);
+    // Compares pixels from the generated PNG to the hand-made PNG.
+	private function compareGeneratedToExpected(svgName:String)
+	{
+        var expectedImage:String = '${IMAGES_PATH}/${svgName.replace(".svg", ".png")}';
+        var expectedBitmapData:BitmapData = BitmapData.fromFile(expectedImage);
+        var actualImage:String = '${GENERATED_IMAGES_PATH}/${svgName.replace(".svg", ".png")}';
+        var actualBitmapData:BitmapData = BitmapData.fromFile(actualImage);
+        
+        var test = newSvgTest(svgName);
+        
+        if (expectedBitmapData.width != actualBitmapData.width || expectedBitmapData.height != actualBitmapData.height)
+        {
+            test.diffPercentage = 1;
+            results.failedTests.push(test);
+            Assert.fail('${svgName} generated at the wrong size (expected ${expectedBitmapData.width}x${expectedBitmapData.height}, got ${actualBitmapData.width}x${actualBitmapData.height})');
+        }
+        else
+        {
+            // Calculate the number of pixels that are different from what they should be.
+            // Since we're averaging across the entire image, even if a few pixels are
+            // drastically different, if the overall images are similar, we get a small diff.
+            // We use BitmapData.compare to generate the "diff image" between two images.
+            // The diff image has one non-transparent pixel for every pixel that differs.
+            // Because of the way it calculates transparency, the safest way to know if
+            // there's a diff is to get the pixel RGB values (not RGBA).
+            // To see how this diff image works, just replace any SVG with a coloured rectangle and re-run the tests.
+            var diffPixels:BitmapData = actualBitmapData.compare(expectedBitmapData);
+            var numPixelsThatAreDifferent:Int = 0;
             
-			if (expectedBitmapData.width != actualBitmapData.width || expectedBitmapData.height != actualBitmapData.height)
+            for (y in 0 ... diffPixels.height)
             {
-				failedTests.push(test);
+                for (x in 0 ... diffPixels.width)
+                {
+                    var diffPixel = diffPixels.getPixel(x, y);
+                    // Extract RGB values
+                    var components = getComponents(diffPixel);
+                    var red = components[0];
+                    var green = components[1];
+                    var blue = components[2];
+                    if (red > 0 || green > 0 || blue > 0)
+                    {
+                        numPixelsThatAreDifferent++;                        
+                    }                        
+                }
+            }
+            
+            // Average over all pixels in the image
+            var culmulativeDiff:Float = numPixelsThatAreDifferent / (diffPixels.width * diffPixels.height);
+            test.diffPixels = diffPixels;
+            test.diffPercentage = culmulativeDiff;
+            var diffFile:String = '${GENERATED_IMAGES_PATH}/${svgName.replace(".svg", "-diff.png")}';
+            File.saveBytes(diffFile, diffPixels.encode(diffPixels.rect, new PNGEncoderOptions()));                
+            
+            if (culmulativeDiff >= SVG_DIFF_TOLERANCE_PERCENT)
+            {
+                results.failedTests.push(test);
+                Assert.fail('${svgName} has ${Math.round(culmulativeDiff * 100)}% pixels different, which is over the threshold of ${SVG_DIFF_TOLERANCE_PERCENT * 100}%');                
             }
             else
             {
-                // Calculate the number of pixels that are different from what they should be.
-                // Since we're averaging across the entire image, even if a few pixels are
-                // drastically different, if the overall images are similar, we get a small diff.
-                // We use BitmapData.compare to generate the "diff image" between two images.
-                // The diff image has one non-transparent pixel for every pixel that differs.
-                // Because of the way it calculates transparency, the safest way to know if
-                // there's a diff is to get the pixel RGB values (not RGBA).
-                // To see how this diff image works, just replace any SVG with a coloured rectangle and re-run the tests.
-                var diffPixels:BitmapData = actualBitmapData.compare(expectedBitmapData);
-                var numPixelsThatAreDifferent:Int = 0;
-                
-                for (y in 0 ... diffPixels.height)
-                {
-                    for (x in 0 ... diffPixels.width)
-                    {
-                        var diffPixel = diffPixels.getPixel(x, y);
-                        // Extract RGB values
-                        var components = getComponents(diffPixel);
-                        var red = components[0];
-                        var green = components[1];
-                        var blue = components[2];
-                        if (red > 0 || green > 0 || blue > 0)
-                        {
-                            numPixelsThatAreDifferent++;                        
-                        }                        
-                    }
-                }
-                
-                // Average over all pixels in the image
-                var culmulativeDiff:Float = numPixelsThatAreDifferent / (width * height);
-                test.diffPixels = diffPixels;
-                test.diffPercentage = culmulativeDiff;
-                var diffFile:String = '${GENERATED_IMAGES_PATH}/${test.fileName.replace(".svg", "-diff.png")}';
-                File.saveBytes(diffFile, diffPixels.encode(diffPixels.rect, new PNGEncoderOptions()));                
-                
-			    if (culmulativeDiff >= SVG_DIFF_TOLERANCE_PERCENT)
-                {
-                    failedTests.push(test);
-                }
-                else
-                {
-                    passedTests.push(test);
-                }             
-            }
-		}
-		var toReturn = { passedTests: passedTests, failedTests: failedTests };
-		return toReturn;
-	}
-
-	// Creates the HTML report
-	private function createHtmlReport(results:GenerationResults)
-	{
-		var html:String = '<html><head>
-		<title>${results.failedTests.length} failures | SVG Generation Tests</title>
-		</head><body style="background-color: #eee">';
-
-		// TODO: beautify HTML.
-		var total = results.failedTests.length + results.passedTests.length;
-		// Failures first, because we care about fixing those
-		html += createTableFor(results.failedTests, "Failures");
-		html += createTableFor(results.passedTests, "Successes");
-
-		html = '${html}</body></html>';
-
-		if (sys.FileSystem.exists(RESULTS_HTML_FILE)) {
-			sys.FileSystem.deleteFile(RESULTS_HTML_FILE);
-		}
-		sys.io.File.saveContent(RESULTS_HTML_FILE, html);
-	}
-
-	private function createTableFor(tests:Array<SvgTest>, header:String) : String
-	{
-		var html:String = '<h1>${tests.length} ${header}</h1>';
-		html += "<table><tr>
-			<th>Expected (PNG)</th>
-			<th>Actual (PNG)</th>
-            <th>Diff Image</th>
-            <th>Average Pixel Diff %</th>";
-            
-
-		for (test in tests) {
-			var pngFile = test.fileName.replace('.svg', '.png');
-			var diffFile = test.fileName.replace('.svg', '-diff.png');
-			html += '<tr>
-				<td><img src="${IMAGES_PATH}/${pngFile}" /></td>
-				<td><img src="${GENERATED_IMAGES_PATH}/${pngFile}" /></td>
-				<td><img src="${GENERATED_IMAGES_PATH}/${diffFile}" /></td>                
-                <td>${test.diffPercentage * 100}%</td>
-			</tr>';
-		}
-		html += "</table>";
-		return html;
+                results.passedTests.push(test);
+            }             
+        }
 	}
     
     // Given a pixel (0xRRGGBB), return an array [RR, GG, BB]
@@ -237,6 +227,39 @@ class SvgGenerationTest
         var toReturn = [red, green, blue];
         return toReturn;
     }
+
+	// Returns the HTML report
+	private function getReportHtml():String
+	{
+		// Failures first, because we care about fixing those
+		var html:String = createTableFor(results.failedTests, "Failures");
+		html += createTableFor(results.passedTests, "Successes");        
+        return html;
+	}
+
+	private function createTableFor(tests:Array<SvgTest>, header:String):String
+	{
+        var html:String = '<h1>${tests.length} ${header}</h1>
+        <table><tr>
+			<th>Expected (PNG)</th>
+			<th>Actual (PNG)</th>
+            <th>Diff Image</th>
+            <th>Average Pixel Diff %</th>
+        </tr>';
+        
+		for (test in tests) {
+			var pngFile = test.fileName.replace('.svg', '.png');
+			var diffFile = test.fileName.replace('.svg', '-diff.png');
+			html += '<tr>
+				<td><img src="${IMAGES_PATH}/${pngFile}" /></td>
+				<td><img src="${GENERATED_IMAGES_PATH}/${pngFile}" /></td>
+				<td><img src="${GENERATED_IMAGES_PATH}/${diffFile}" /></td>                
+                <td>${test.diffPercentage * 100}%</td>
+			</tr>';
+		}
+		html += "</table>";
+		return html;
+	}
     
     private function newSvgTest(fileName:String):SvgTest
     {
