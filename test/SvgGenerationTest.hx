@@ -6,11 +6,12 @@ import massive.munit.async.AsyncFactory;
 
 import format.SVG;
 
+import openfl.Assets;
 import openfl.display.Shape;
 import openfl.display.PNGEncoderOptions;
 import openfl.display.BitmapData;
 import openfl.display.Bitmap;
-import openfl.Assets;
+import openfl.utils.Object;
 
 import sys.io.File;
 
@@ -52,7 +53,13 @@ class SvgGenerationTest
         // This file is a small circle; it has a lot of anti-aliasing artifacts in the diff.
         // This might be problematic. Right now, we have a large SVG diff tolerance percentage.
         generateAndCompare("all_rights_reserved_white.svg");
-    }    
+    }
+    
+    @Test
+    public function fancySunIconRendersCorrectlyAtOriginalSize()
+    {
+        generateAndCompare("fancy-sun.svg");
+    }
     
     @BeforeClass
     public function cleanPreviousTestRunResults() {
@@ -172,42 +179,52 @@ class SvgGenerationTest
             // Because of the way it calculates transparency, the safest way to know if
             // there's a diff is to get the pixel RGB values (not RGBA).
             // To see how this diff image works, just replace any SVG with a coloured rectangle and re-run the tests.
-            var diffPixels:BitmapData = actualBitmapData.compare(expectedBitmapData);
+            var result:Object = actualBitmapData.compare(expectedBitmapData);
             var numPixelsThatAreDifferent:Int = 0;
             
-            for (y in 0 ... diffPixels.height)
+            if (result == 0)
             {
-                for (x in 0 ... diffPixels.width)
-                {
-                    var diffPixel = diffPixels.getPixel(x, y);
-                    // Extract RGB values
-                    var components = getComponents(diffPixel);
-                    var red = components[0];
-                    var green = components[1];
-                    var blue = components[2];
-                    if (red > 0 || green > 0 || blue > 0)
-                    {
-                        numPixelsThatAreDifferent++;                        
-                    }                        
-                }
-            }
-            
-            // Average over all pixels in the image
-            var culmulativeDiff:Float = numPixelsThatAreDifferent / (diffPixels.width * diffPixels.height);
-            test.diffPixels = diffPixels;
-            test.diffPercentage = culmulativeDiff;
-            var diffFile:String = '${GENERATED_IMAGES_PATH}/${svgName.replace(".svg", "-diff.png")}';
-            File.saveBytes(diffFile, diffPixels.encode(diffPixels.rect, new PNGEncoderOptions()));                
-            
-            if (culmulativeDiff >= SVG_DIFF_TOLERANCE_PERCENT)
-            {
-                results.failedTests.push(test);
-                Assert.fail('${svgName} has ${Math.round(culmulativeDiff * 100)}% pixels different, which is over the threshold of ${SVG_DIFF_TOLERANCE_PERCENT * 100}%');                
+                // A rare, but awesome, exact match!
+                results.passedTests.push(test);
             }
             else
             {
-                results.passedTests.push(test);
-            }             
+                var diffPixels = cast(result, BitmapData);
+                
+                for (y in 0 ... diffPixels.height)
+                {
+                    for (x in 0 ... diffPixels.width)
+                    {
+                        var diffPixel = diffPixels.getPixel(x, y);
+                        // Extract RGB values
+                        var components = getComponents(diffPixel);
+                        var red = components[0];
+                        var green = components[1];
+                        var blue = components[2];
+                        if (red > 0 || green > 0 || blue > 0)
+                        {
+                            numPixelsThatAreDifferent++;                        
+                        }                        
+                    }
+                }
+                
+                // Average over all pixels in the image
+                var culmulativeDiff:Float = numPixelsThatAreDifferent / (diffPixels.width * diffPixels.height);
+                test.diffPixels = diffPixels;
+                test.diffPercentage = culmulativeDiff;
+                var diffFile:String = '${GENERATED_IMAGES_PATH}/${svgName.replace(".svg", "-diff.png")}';
+                File.saveBytes(diffFile, diffPixels.encode(diffPixels.rect, new PNGEncoderOptions()));                
+                
+                if (culmulativeDiff >= SVG_DIFF_TOLERANCE_PERCENT)
+                {
+                    results.failedTests.push(test);
+                    Assert.fail('${svgName} has ${Math.round(culmulativeDiff * 100)}% pixels different, which is over the threshold of ${SVG_DIFF_TOLERANCE_PERCENT * 100}%');                
+                }
+                else
+                {
+                    results.passedTests.push(test);
+                } 
+            }
         }
 	}
     
@@ -252,10 +269,18 @@ class SvgGenerationTest
 			var diffFile = test.fileName.replace('.svg', '-diff.png');
 			html += '<tr>
 				<td><img src="${IMAGES_PATH}/${pngFile}" /></td>
-				<td><img src="${GENERATED_IMAGES_PATH}/${pngFile}" /></td>
-				<td><img src="${GENERATED_IMAGES_PATH}/${diffFile}" /></td>                
-                <td>${test.diffPercentage * 100}%</td>
-			</tr>';
+				<td><img src="${GENERATED_IMAGES_PATH}/${pngFile}" /></td>';
+            var diffFilePath = '${GENERATED_IMAGES_PATH}/${diffFile}';
+            if (sys.FileSystem.exists(diffFilePath))
+            {
+				html += '<td><img src="${GENERATED_IMAGES_PATH}/${diffFile}" /></td>';
+            }
+            else
+            {
+                html += '<td>(No difference)</td>';
+            }
+            
+            html += '<td>${test.diffPercentage * 100}%</td></tr>';
 		}
 		html += "</table>";
 		return html;
