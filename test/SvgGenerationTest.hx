@@ -42,13 +42,13 @@ class SvgGenerationTest
 	public function new() {	}
     
     @Test
-	public function ubuntuLogoRendersCorrectlyAt256x256()
+	public function ubuntuLogoRendersCorrectly()
 	{
         generateAndCompare("ubuntu-logo-orange.svg", 256, 256);
 	}
     
     @Test
-    public function allRightsReservedRendersCorrectlyAtOriginalSize()
+    public function allRightsReservedRendersCorrectly()
     {
         // This file is a small circle; it has a lot of anti-aliasing artifacts in the diff.
         // This might be problematic. Right now, we have a large SVG diff tolerance percentage.
@@ -56,7 +56,7 @@ class SvgGenerationTest
     }
     
     @Test
-    public function fancySunIconRendersCorrectlyAtOriginalSize()
+    public function fancySunIconRendersCorrectly()
     {
         generateAndCompare("fancy-sun.svg");
     }
@@ -101,16 +101,14 @@ class SvgGenerationTest
     
     private function generateAndCompare(svgName:String, pngWidth:Int = 0, pngHeight:Int = 0)
     {
-        generatePng(svgName, pngWidth, pngHeight);
-        compareGeneratedToExpected(svgName);
+        var pngName = generatePng(svgName, pngWidth, pngHeight);
+        compareGeneratedToExpected(svgName, pngName);
     }
     
     // Generates a PNG from an SVG at the specified width/height.
-    private function generatePng(svgName:String, pngWidth:Int = 0, pngHeight:Int = 0)
+    private function generatePng(svgName:String, pngWidth:Int = 0, pngHeight:Int = 0):String
     {
-        // Generate the SVG (starts here)
         var svg = new SVG(File.getContent('${IMAGES_PATH}/${svgName}'));
-        var outputFile = '${GENERATED_IMAGES_PATH}/${svgName.replace(".svg", ".png")}';
 
         // Render to the size of the PNG image representing our "expected" value.
         // If the user passed in a width/height, we use that. Otherwise, we use
@@ -139,6 +137,9 @@ class SvgGenerationTest
             height = 256;
             width = Math.round(width * scale);
         }
+
+        var pngFileName = svgName.replace(".svg", '-${width}x${height}.png');
+        var outputFile = '${GENERATED_IMAGES_PATH}/${pngFileName}';
         
         // Fully-transparent and white
         var backgroundColor = 0x00FFFFFF;
@@ -151,14 +152,16 @@ class SvgGenerationTest
         actualBitmapData.draw(shape);
 
         File.saveBytes(outputFile, actualBitmapData.encode(actualBitmapData.rect, new PNGEncoderOptions()));
+        
+        return pngFileName;
     }
 
     // Compares pixels from the generated PNG to the hand-made PNG.
-	private function compareGeneratedToExpected(svgName:String)
+	private function compareGeneratedToExpected(svgName:String, pngName:String)
 	{
-        var expectedImage:String = '${IMAGES_PATH}/${svgName.replace(".svg", ".png")}';
+        var expectedImage:String = '${IMAGES_PATH}/${pngName}';
         var expectedBitmapData:BitmapData = BitmapData.fromFile(expectedImage);
-        var actualImage:String = '${GENERATED_IMAGES_PATH}/${svgName.replace(".svg", ".png")}';
+        var actualImage:String = '${GENERATED_IMAGES_PATH}/${pngName}';
         var actualBitmapData:BitmapData = BitmapData.fromFile(actualImage);
         
         var test = newSvgTest(svgName);
@@ -265,7 +268,7 @@ class SvgGenerationTest
         </tr>';
         
 		for (test in tests) {
-			var pngFile = test.fileName.replace('.svg', '.png');
+			var pngFile = test.fileName.replace('.svg', '${test.expectedWidth}x${test.expectedHeight}.png');
 			var diffFile = test.fileName.replace('.svg', '-diff.png');
 			html += '<tr>
 				<td><img src="${IMAGES_PATH}/${pngFile}" /></td>
