@@ -35,7 +35,7 @@ class SvgGenerationTest
     // Percentage difference allowable between expected/actual images
     // Ranges from 0 to 1 (0.1 = 10% diff)
     // Currently at 15% because anti-aliasing artifacts on small images makes a big difference
-    private static inline var SVG_DIFF_TOLERANCE_PERCENT:Float = 0.15;
+    private static inline var SVG_DIFF_TOLERANCE_PERCENT:Float = 0.10;
     
     private var results:GenerationResults;
     
@@ -51,8 +51,8 @@ class SvgGenerationTest
     public function allRightsReservedRendersCorrectly()
     {
         // This file is a small circle; it has a lot of anti-aliasing artifacts in the diff.
-        // This might be problematic. Right now, we have a large SVG diff tolerance percentage.
-        generateAndCompare("all_rights_reserved_white.svg");
+        // This might be problematic. Hence, we render a larger version (4x).
+        generateAndCompare("all_rights_reserved_white.svg", 256, 256);
     }
     
     @Test
@@ -160,6 +160,10 @@ class SvgGenerationTest
 	private function compareGeneratedToExpected(svgName:String, pngName:String)
 	{
         var expectedImage:String = '${IMAGES_PATH}/${pngName}';
+        if (sys.FileSystem.exists(pngName))
+        {
+            throw '${expectedImage} doesn\'t exist. Please create it.';
+        }
         var expectedBitmapData:BitmapData = BitmapData.fromFile(expectedImage);
         var actualImage:String = '${GENERATED_IMAGES_PATH}/${pngName}';
         var actualBitmapData:BitmapData = BitmapData.fromFile(actualImage);
@@ -174,6 +178,9 @@ class SvgGenerationTest
         }
         else
         {
+            test.expectedWidth = expectedBitmapData.width;
+            test.expectedHeight = expectedBitmapData.height;
+            
             // Calculate the number of pixels that are different from what they should be.
             // Since we're averaging across the entire image, even if a few pixels are
             // drastically different, if the overall images are similar, we get a small diff.
@@ -215,7 +222,8 @@ class SvgGenerationTest
                 var culmulativeDiff:Float = numPixelsThatAreDifferent / (diffPixels.width * diffPixels.height);
                 test.diffPixels = diffPixels;
                 test.diffPercentage = culmulativeDiff;
-                var diffFile:String = '${GENERATED_IMAGES_PATH}/${svgName.replace(".svg", "-diff.png")}';
+                var diffPngFile = svgName.replace(".svg", '-${test.expectedWidth}x${test.expectedHeight}-diff.png');
+                var diffFile:String = '${GENERATED_IMAGES_PATH}/${diffPngFile}';
                 File.saveBytes(diffFile, diffPixels.encode(diffPixels.rect, new PNGEncoderOptions()));                
                 
                 if (culmulativeDiff >= SVG_DIFF_TOLERANCE_PERCENT)
@@ -268,8 +276,8 @@ class SvgGenerationTest
         </tr>';
         
 		for (test in tests) {
-			var pngFile = test.fileName.replace('.svg', '${test.expectedWidth}x${test.expectedHeight}.png');
-			var diffFile = test.fileName.replace('.svg', '-diff.png');
+			var pngFile = test.fileName.replace('.svg', '-${test.expectedWidth}x${test.expectedHeight}.png');
+			var diffFile = test.fileName.replace('.svg', '-${test.expectedWidth}x${test.expectedHeight}-diff.png');
 			html += '<tr>
 				<td><img src="${IMAGES_PATH}/${pngFile}" /></td>
 				<td><img src="${GENERATED_IMAGES_PATH}/${pngFile}" /></td>';
