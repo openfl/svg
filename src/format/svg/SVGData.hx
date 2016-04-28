@@ -23,6 +23,12 @@ import haxe.ds.StringMap;
 typedef StringMap<T> = Hash<T>;
 #end
 
+enum Color
+{
+  Color(rgb:Int);
+  ColorAlpha(rgb:Int, a:Float);
+  ColorNone;
+}
 
 class SVGData extends Group {
 	
@@ -35,8 +41,10 @@ class SVGData extends Group {
 	private static var mScaleMatch = ~/scale\((.*)\)/;
 	private static var mMatrixMatch = ~/matrix\((.*)[, ](.*)[, ](.*)[, ](.*)[, ](.*)[, ](.*)\)/;
 	private static var mURLMatch = ~/url\(#(.*)\)/;
+	private static var mRGBAMatch = ~/rgba\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/;
+	private static var mRGBMatch = ~/rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/;
 	private static var defaultFill = FillSolid(0x000000);
-	
+
 	public var height (default, null):Float;
 	public var width (default, null):Float;
 
@@ -196,6 +204,27 @@ class SVGData extends Group {
 			return FillSolid (parseHex(s.substr(1)));
 			
 		}
+
+		if (mRGBAMatch.match (s)) {
+			
+			var r = Std.parseInt(mRGBAMatch.matched (1));
+			var g = Std.parseInt(mRGBAMatch.matched (2));
+			var b = Std.parseInt(mRGBAMatch.matched (3));
+			var a = Std.parseFloat(mRGBAMatch.matched (4));
+
+			return FillSolidAlpha ( r<<16 | g<<8 | b, a);
+			
+		}
+
+		if (mRGBMatch.match (s)) {
+			
+			var r = Std.parseInt(mRGBMatch.matched (1));
+			var g = Std.parseInt(mRGBMatch.matched (2));
+			var b = Std.parseInt(mRGBMatch.matched (3));
+
+			return FillSolid ( r<<16 | g<<8 | b);
+			
+		}
 		
 		if (s == "none") {
 			
@@ -264,7 +293,7 @@ class SVGData extends Group {
 	}
 
 
-	private function getStrokeStyle (inKey:String, inNode:Xml, inStyles:StringMap <String>, inDefault:Null<Int>) {
+	private function getStrokeStyle (inKey:String, inNode:Xml, inStyles:StringMap <String>, inDefault:Color) {
 		
 		var s = getStyle (inKey, inNode, inStyles, "");
 		
@@ -273,20 +302,41 @@ class SVGData extends Group {
 			return inDefault;
 			
 		}
+
+		if (mRGBAMatch.match (s)) {
+			
+			var r = Std.parseInt(mRGBAMatch.matched (1));
+			var g = Std.parseInt(mRGBAMatch.matched (2));
+			var b = Std.parseInt(mRGBAMatch.matched (3));
+			var a = Std.parseFloat(mRGBAMatch.matched (4));
+
+			return ColorAlpha(r<<16 | g <<8 | b, a);
+			
+		}
+
+		if (mRGBMatch.match (s)) {
+			
+			var r = Std.parseInt(mRGBMatch.matched (1));
+			var g = Std.parseInt(mRGBMatch.matched (2));
+			var b = Std.parseInt(mRGBMatch.matched (3));
+
+			return Color(r<<16 | g <<8 | b);
+			
+		}
 		
 		if (s == "none") {
 			
-			return null;
+			return ColorNone;
 			
 		}
 		
 		if (s.charAt (0) == '#') {
 			
-			return parseHex(s.substr(1));
+			return Color ( parseHex(s.substr(1)) );
 			
 		}
 		
-		return Std.parseInt (s);
+		return Color ( Std.parseInt (s) );
 		
 	}
 	
@@ -578,8 +628,14 @@ class SVGData extends Group {
 		path.fill = getFillStyle ("fill", inPath, styles);
 		path.alpha = getFloatStyle ("opacity", inPath, styles, 1.0);
 		path.fill_alpha = getFloatStyle ("fill-opacity", inPath, styles, 1.0);
+		var color = getStrokeStyle ("stroke", inPath, styles, ColorNone);
 		path.stroke_alpha = getFloatStyle ("stroke-opacity", inPath, styles, 1.0);
-		path.stroke_colour = getStrokeStyle ("stroke", inPath, styles, null);
+		path.stroke_colour = null;
+		switch color {
+			case Color(rgb): path.stroke_colour = rgb;
+			case ColorAlpha(rgb, a): path.stroke_colour = rgb; path.stroke_alpha *= a;
+			default:
+		}
 		path.stroke_width = getFloatStyle ("stroke-width", inPath, styles, 1.0);
 		path.stroke_caps = getStyleAndConvert ("stroke-linecap", inPath, styles, null, 
 			["round" => CapsStyle.ROUND, "square" => CapsStyle.SQUARE, "butt" => CapsStyle.NONE]);
@@ -688,8 +744,14 @@ class SVGData extends Group {
 		text.y = getFloat (inText, "y", 0.0);
 		text.fill = getFillStyle ("fill", inText, styles);
 		text.fill_alpha = getFloatStyle ("fill-opacity", inText, styles, 1.0);
+		var color = getStrokeStyle ("stroke", inText, styles, ColorNone);
 		text.stroke_alpha = getFloatStyle ("stroke-opacity", inText, styles, 1.0);
-		text.stroke_colour = getStrokeStyle ("stroke", inText, styles, null);
+		text.stroke_colour = null;
+		switch color {
+			case Color(rgb): text.stroke_colour = rgb;
+			case ColorAlpha(rgb, a): text.stroke_colour = rgb; text.stroke_alpha *= a;
+			default:
+		}
 		text.stroke_width = getFloatStyle ("stroke-width", inText, styles, 1.0);
 		text.font_family = getStyle ("font-family", inText, styles, "");
 		text.font_size = getFloatStyle ("font-size", inText, styles, 12);
@@ -723,5 +785,5 @@ class SVGData extends Group {
     
 		return Std.parseInt ("0x" + hex);
 	}
-	
+
 }

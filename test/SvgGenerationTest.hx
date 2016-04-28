@@ -66,7 +66,13 @@ class SvgGenerationTest
     {
       generateAndCompare("alphachannel.svg", 100, 100);
     }
-    
+
+    @Test
+    public function fillColorRGBA()
+    {
+      generateAndCompare("fill_rgba.svg", 100, 100);
+    }
+
     @BeforeClass
     public function cleanPreviousTestRunResults() {
         
