@@ -713,10 +713,12 @@ class SVGData extends Group {
 
 	private static inline function parseHex(hex:String):Int
 	{
-		if (hex.length==3) {
-			hex = hex.substr(0,1)+hex.substr(0,1)+
-				hex.substr(1,1)+hex.substr(1,1)+
-				hex.substr(2,1)+hex.substr(2,1);
+		// Support 3-character hex color shorthand
+		//  e.g. #RGB -> #RRGGBB
+		if (hex.length == 3) {
+			hex = hex.substr(0,1) + hex.substr(0,1) +
+			      hex.substr(1,1) + hex.substr(1,1) +
+			      hex.substr(2,1) + hex.substr(2,1);
 		}
     
 		return Std.parseInt ("0x" + hex);
