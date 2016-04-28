@@ -122,6 +122,8 @@ class SVGRenderer
                 mGfx.beginGradientFill(grad);
              case FillSolid(colour):
                 mGfx.beginFill(colour,inPath.fill_alpha*inPath.alpha);
+             case FillSolidAlpha(colour, alpha):
+                mGfx.beginFill(colour,inPath.fill_alpha*inPath.alpha*alpha);
              case FillNone:
                 //mGfx.endFill();
           }
