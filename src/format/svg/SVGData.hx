@@ -171,8 +171,8 @@ class SVGData extends Group {
 		}
 		
 		if (s.charAt (0) == '#') {
-			
-			return Std.parseInt ("0x" + s.substr (1));
+
+			return parseHex(s.substr(1));
 			
 		}
 		
@@ -193,7 +193,7 @@ class SVGData extends Group {
 		
 		if (s.charAt (0) == '#') {
 			
-			return FillSolid (Std.parseInt ("0x" + s.substr (1)));
+			return FillSolid (parseHex(s.substr(1)));
 			
 		}
 		
@@ -282,7 +282,7 @@ class SVGData extends Group {
 		
 		if (s.charAt (0) == '#') {
 			
-			return Std.parseInt ("0x" + s.substr (1));
+			return parseHex(s.substr(1));
 			
 		}
 		
@@ -710,6 +710,18 @@ class SVGData extends Group {
 		return text;
 		
 	}
-	
+
+	private static inline function parseHex(hex:String):Int
+	{
+		// Support 3-character hex color shorthand
+		//  e.g. #RGB -> #RRGGBB
+		if (hex.length == 3) {
+			hex = hex.substr(0,1) + hex.substr(0,1) +
+			      hex.substr(1,1) + hex.substr(1,1) +
+			      hex.substr(2,1) + hex.substr(2,1);
+		}
+    
+		return Std.parseInt ("0x" + hex);
+	}
 	
 }

@@ -60,6 +60,12 @@ class SvgGenerationTest
     {
         generateAndCompare("fancy-sun.svg");
     }
+
+    @Test
+    public function alphaChannelAnd3CharHexColors()
+    {
+      generateAndCompare("alphachannel.svg", 100, 100);
+    }
     
     @BeforeClass
     public function cleanPreviousTestRunResults() {
