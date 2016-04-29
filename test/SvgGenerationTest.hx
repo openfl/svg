@@ -62,6 +62,12 @@ class SvgGenerationTest
     }
 
     @Test
+    public function scaleRectStrokeWidth()
+    {
+      generateAndCompare("scale_rect.svg", 256, 256);
+    }
+
+    @Test
     public function alphaChannelAnd3CharHexColors()
     {
       generateAndCompare("alphachannel.svg", 100, 100);

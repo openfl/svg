@@ -29,6 +29,7 @@ typedef ObjectFilter = String->GroupPath->Bool;
 
 class SVGRenderer
 {
+    public static inline var SQRT2:Float = 1.41421356237;
     public var width(default,null):Float;
     public var height(default,null):Float;
 
@@ -134,7 +135,7 @@ class SVGRenderer
           else
           {
              var style = new format.gfx.LineStyle();
-             var scale = Math.sqrt(m.a*m.a + m.d*m.d);
+             var scale = Math.sqrt(m.a*m.a + m.d*m.d)/SQRT2;
              style.thickness = inPath.stroke_width*scale;
              style.alpha = inPath.stroke_alpha*inPath.alpha;
              style.color = inPath.stroke_colour;
