@@ -35,6 +35,7 @@ class SVGData extends Group {
 	private static var mScaleMatch = ~/scale\((.*)\)/;
 	private static var mMatrixMatch = ~/matrix\((.*)[, ](.*)[, ](.*)[, ](.*)[, ](.*)[, ](.*)\)/;
 	private static var mURLMatch = ~/url\(#(.*)\)/;
+	private static var mRGBMatch = ~/rgb\s*\(\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*\)/;
 	private static var defaultFill = FillSolid(0x000000);
 	
 	public var height (default, null):Float;
@@ -196,6 +197,12 @@ class SVGData extends Group {
 			return FillSolid (parseHex(s.substr(1)));
 			
 		}
+
+		if (mRGBMatch.match (s)) {
+			
+			return FillSolid ( parseRGBMatch(mRGBMatch) );
+			
+		}
 		
 		if (s == "none") {
 			
@@ -271,6 +278,13 @@ class SVGData extends Group {
 		if (s == "") {
 			
 			return inDefault;
+			
+		}
+
+
+		if (mRGBMatch.match (s)) {
+			
+			return parseRGBMatch(mRGBMatch);
 			
 		}
 		
@@ -723,5 +737,28 @@ class SVGData extends Group {
     
 		return Std.parseInt ("0x" + hex);
 	}
-	
+
+	private static inline function parseRGBMatch(rgbMatch):Int
+	{
+			// CSS2 rgb color definition, matches 0-255 or 0-100%
+			// e.g. rgb(255,127,0) == rgb(100%,50%,0)
+
+			inline function range(val:Float):Int {
+				// constrain to Int 0-255
+        if (val<0) val = 0;
+        if (val>255) val = 255;
+				return Std.int( val );
+			}
+
+			var r = Std.parseFloat(rgbMatch.matched (1));
+			if (rgbMatch.matched(2)=='%') r = r * 255 / 100;
+
+			var g = Std.parseFloat(rgbMatch.matched (3));
+			if (rgbMatch.matched(4)=='%') g = g * 255 / 100;
+
+			var b = Std.parseFloat(rgbMatch.matched (5));
+			if (rgbMatch.matched(6)=='%') b = b * 255 / 100;
+
+			return ( range(r)<<16 ) | ( range(g)<<8 ) | range(b);
+	}
 }
