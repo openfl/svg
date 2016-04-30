@@ -172,7 +172,7 @@ class SVGData extends Group {
 		
 		if (s.charAt (0) == '#') {
 
-			return parseHex(s.substr(1));
+			return SVGColor.parseHex(s.substr(1));
 			
 		}
 		
@@ -193,13 +193,13 @@ class SVGData extends Group {
 		
 		if (s.charAt (0) == '#') {
 			
-			return FillSolid (parseHex(s.substr(1)));
+			return FillSolid (SVGColor.parseHex(s.substr(1)));
 			
 		}
 
 		if (mRGBMatch.match (s)) {
 			
-			return FillSolid ( parseRGBMatch(mRGBMatch) );
+			return FillSolid ( SVGColor.parseRGBMatch(mRGBMatch) );
 			
 		}
 		
@@ -222,6 +222,12 @@ class SVGData extends Group {
 			throw ("Unknown url:" + url);
 			
 		}
+
+		if (SVGColor.nameMap.exists( s.toLowerCase() ))
+		{
+			return FillSolid ( SVGColor.parseHex(SVGColor.nameMap.get( s.toLowerCase() )) );
+		}
+
 		
 		throw ("Unknown fill string:" + s);
 		
@@ -283,7 +289,7 @@ class SVGData extends Group {
 
 		if (mRGBMatch.match (s)) {
 			
-			return parseRGBMatch(mRGBMatch);
+			return SVGColor.parseRGBMatch(mRGBMatch);
 			
 		}
 		
@@ -292,10 +298,15 @@ class SVGData extends Group {
 			return null;
 			
 		}
+
+		if (SVGColor.nameMap.exists( s.toLowerCase() ))
+		{
+			return SVGColor.parseHex(SVGColor.nameMap.get( s.toLowerCase() ));
+		}
 		
 		if (s.charAt (0) == '#') {
 			
-			return parseHex(s.substr(1));
+			return SVGColor.parseHex(s.substr(1));
 			
 		}
 		
@@ -724,40 +735,4 @@ class SVGData extends Group {
 		
 	}
 
-	private static inline function parseHex(hex:String):Int
-	{
-		// Support 3-character hex color shorthand
-		//  e.g. #RGB -> #RRGGBB
-		if (hex.length == 3) {
-			hex = hex.substr(0,1) + hex.substr(0,1) +
-			      hex.substr(1,1) + hex.substr(1,1) +
-			      hex.substr(2,1) + hex.substr(2,1);
-		}
-    
-		return Std.parseInt ("0x" + hex);
-	}
-
-	private static inline function parseRGBMatch(rgbMatch:EReg):Int
-	{
-			// CSS2 rgb color definition, matches 0-255 or 0-100%
-			// e.g. rgb(255,127,0) == rgb(100%,50%,0)
-
-			inline function range(val:Float):Int {
-				// constrain to Int 0-255
-				if (val < 0) { val = 0; }
-				if (val > 255) { val = 255; }
-				return Std.int( val );
-			}
-
-			var r = Std.parseFloat(rgbMatch.matched (1));
-			if (rgbMatch.matched(2)=='%') { r = r * 255 / 100; }
-
-			var g = Std.parseFloat(rgbMatch.matched (3));
-			if (rgbMatch.matched(4)=='%') { g = g * 255 / 100; }
-
-			var b = Std.parseFloat(rgbMatch.matched (5));
-			if (rgbMatch.matched(6)=='%') { b = b * 255 / 100; }
-
-			return ( range(r)<<16 ) | ( range(g)<<8 ) | range(b);
-	}
 }
