@@ -33,6 +33,7 @@ class SVGData extends Group {
 	private static var mTranslateMatch = ~/translate\((.*)[, ](.*)\)/;
 	private static var mScaleMatch = ~/scale\((.*)\)/;
 	private static var mMatrixMatch = ~/matrix\((.*)[, ](.*)[, ](.*)[, ](.*)[, ](.*)[, ](.*)\)/;
+	private static var mRotationMatch = ~/rotate\(([0-9\.]+) ([0-9\.]+),([0-9\.]+)\)/;
 	private static var mURLMatch = ~/url\(#(.*)\)/;
 	private static var mRGBMatch = ~/rgb\s*\(\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*\)/;
 	private static var defaultFill = FillSolid(0x000000);
@@ -90,11 +91,13 @@ class SVGData extends Group {
 	}
 	
 	
+    // Applies the transformation specified in inTrans to ioMatrix. Returns the new scale
+    // value after applying the transformation. 
 	private function applyTransform (ioMatrix:Matrix, inTrans:String):Float {
 		
 		var scale = 1.0;
 		
-		if (mTranslateMatch.match(inTrans))
+        if (mTranslateMatch.match(inTrans))
 		{
 			// TODO: Pre-translate
 			
@@ -128,7 +131,15 @@ class SVGData extends Group {
 			ioMatrix.ty = m.ty;
 			
 			scale = Math.sqrt (ioMatrix.a * ioMatrix.a + ioMatrix.c * ioMatrix.c);
-			
+        } else if (mRotationMatch.match (inTrans)) {
+            
+            var degrees = Std.parseFloat (mRotationMatch.matched (1));
+            var radians = degrees * Math.PI / 180;	
+            var rotationX = Std.parseFloat (mRotationMatch.matched (2));	
+            var rotationY = Std.parseFloat (mRotationMatch.matched (3));
+            ioMatrix.translate (-rotationX, -rotationY);
+            ioMatrix.rotate(radians);
+            ioMatrix.translate (rotationX, rotationY);
 		} else { 
 			
 			trace("Warning, unknown transform:" + inTrans);
