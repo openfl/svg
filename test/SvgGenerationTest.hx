@@ -84,6 +84,12 @@ class SvgGenerationTest
     {
         generateAndCompare("rotated-square.svg", 100, 100);
     }
+
+    @Test
+    public function matrixRotatedSquare()
+    {
+        generateAndCompare("matrix-rotated-square.svg", 100, 100);
+    }
     
     @BeforeClass
     public function cleanPreviousTestRunResults() {
