@@ -29,7 +29,7 @@ typedef ObjectFilter = String->GroupPath->Bool;
 
 class SVGRenderer
 {
-    public static inline var SQRT2:Float = 1.41421356237;
+    public static var SQRT2:Float = Math.sqrt(2);
     public var width(default,null):Float;
     public var height(default,null):Float;
 
