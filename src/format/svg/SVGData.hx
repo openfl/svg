@@ -32,7 +32,7 @@ class SVGData extends Group {
 	private static var mStyleValue = ~/\s*(.*)\s*:\s*(.*)\s*/;
 	private static var mTranslateMatch = ~/translate\((.*)[, ](.*)\)/;
 	private static var mScaleMatch = ~/scale\((.*)\)/;
-	private static var mMatrixMatch = ~/matrix\((.*)[, ](.*)[, ](.*)[, ](.*)[, ](.*)[, ](.*)\)/;
+	private static var mMatrixMatch = ~/matrix\((.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)\)/;
 	private static var mRotationMatch = ~/rotate\(([0-9\.]+) ([0-9\.]+),([0-9\.]+)\)/;
 	private static var mURLMatch = ~/url\(#(.*)\)/;
 	private static var mRGBMatch = ~/rgb\s*\(\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*\)/;
@@ -605,9 +605,9 @@ class SVGData extends Group {
 		path.stroke_alpha = getFloatStyle ("stroke-opacity", inPath, styles, 1.0);
 		path.stroke_colour = getStrokeStyle ("stroke", inPath, styles, null);
 		path.stroke_width = getFloatStyle ("stroke-width", inPath, styles, 1.0);
-		path.stroke_caps = getStyleAndConvert ("stroke-linecap", inPath, styles, null, 
+		path.stroke_caps = getStyleAndConvert ("stroke-linecap", inPath, styles, CapsStyle.NONE, 
 			["round" => CapsStyle.ROUND, "square" => CapsStyle.SQUARE, "butt" => CapsStyle.NONE]);
-		path.joint_style = getStyleAndConvert ("stroke-linejoin", inPath, styles, null, 
+		path.joint_style = getStyleAndConvert ("stroke-linejoin", inPath, styles, JointStyle.MITER, 
 			["bevel" => JointStyle.BEVEL, "round" => JointStyle.ROUND, "miter" => JointStyle.MITER]);
 		path.miter_limit = getFloatStyle ("stroke-miterlimit", inPath, styles, 3.0);
 		path.segments = [];
