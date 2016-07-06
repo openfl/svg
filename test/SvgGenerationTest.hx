@@ -78,6 +78,12 @@ class SvgGenerationTest
     {
       generateAndCompare("fill_rgb.svg", 100, 100);
     }
+
+    @Test
+    public function fillColorNames()
+    {
+      generateAndCompare("fill_color_names.svg", 100, 100);
+    }
     
     @Test
     public function rotatedSquareRendersRotated()
