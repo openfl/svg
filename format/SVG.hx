@@ -16,12 +16,18 @@ class SVG {
 	
 	public function new (content:String) {
 		
-		data = new SVGData (Xml.parse (content));
+		if (content != null) {
+			
+			data = new SVGData (Xml.parse (content));
+			
+		}
 		
 	}
 	
 	
 	public function render (graphics:Graphics, x:Float = 0, y:Float = 0, width:Int = -1, height:Int = -1) {
+		
+		if (data == null) return;
 		
 		var matrix = new Matrix ();
 		matrix.identity ();
