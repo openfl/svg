@@ -80,12 +80,6 @@ class SvgGenerationTest
     }
     
     @Test
-    public function rotatedSquareRendersRotated()
-    {
-        generateAndCompare("rotated-square.svg", 100, 100);
-    }
-
-    @Test
     public function matrixRotatedSquare()
     {
         generateAndCompare("matrix-rotated-square.svg", 100, 100);
