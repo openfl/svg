@@ -31,13 +31,14 @@ class SVG {
 		
 		var matrix = new Matrix ();
 		matrix.identity ();
-		matrix.translate (x, y);
 		
 		if (width > -1 && height > -1) {
 			
 			matrix.scale (width / data.width, height / data.height);
 			
 		}
+		
+		matrix.translate (x, y);
 		
 		var renderer = new SVGRenderer (data);
 		renderer.render (graphics, matrix);
