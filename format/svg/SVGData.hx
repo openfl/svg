@@ -33,7 +33,7 @@ class SVGData extends Group {
 	private static var mTranslateMatch = ~/translate\((.*)[, ](.*)\)/;
 	private static var mScaleMatch = ~/scale\((.*)\)/;
 	private static var mMatrixMatch = ~/matrix\((.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)\)/;
-	private static var mRotationMatch = ~/rotate\(([0-9\.]+) ([0-9\.]+),([0-9\.]+)\)/;
+	private static var mRotationMatch = ~/rotate\(([0-9\.]+)(\s+([0-9\.]+)\s*[, ]\s*([0-9\.]+))?\)/;
 	private static var mURLMatch = ~/url\(#(.*)\)/;
 	private static var mRGBMatch = ~/rgb\s*\(\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*\)/;
 	private static var defaultFill = FillSolid(0x000000);
@@ -134,9 +134,18 @@ class SVGData extends Group {
         } else if (mRotationMatch.match (inTrans)) {
             
             var degrees = Std.parseFloat (mRotationMatch.matched (1));
-            var radians = degrees * Math.PI / 180;	
-            var rotationX = Std.parseFloat (mRotationMatch.matched (2));	
+            
+            var rotationX = Std.parseFloat (mRotationMatch.matched (2));
+            if (rotationX == null) {
+                rotationX = 0;
+            }	            
             var rotationY = Std.parseFloat (mRotationMatch.matched (3));
+            if (rotationY == null) {
+                rotationY = 0;
+            }
+            
+            var radians = degrees * Math.PI / 180;	
+            
             ioMatrix.translate (-rotationX, -rotationY);
             ioMatrix.rotate(radians);
             ioMatrix.translate (rotationX, rotationY);
