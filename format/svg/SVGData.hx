@@ -33,7 +33,7 @@ class SVGData extends Group {
 	private static var mTranslateMatch = ~/translate\((.*)[, ](.*)\)/;
 	private static var mScaleMatch = ~/scale\((.*)\)/;
 	private static var mMatrixMatch = ~/matrix\((.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)\)/;
-	private static var mRotationMatch = ~/rotate\(([0-9\.]+)(\s*([0-9\.]+),?\s*([0-9\.]+))?\)/;
+	private static var mRotationMatch = ~/rotate\(([0-9\.]+)(\s+([0-9\.]+),?\s+([0-9\.]+))?\)/;
 	private static var mURLMatch = ~/url\(#(.*)\)/;
 	private static var mRGBMatch = ~/rgb\s*\(\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*\)/;
 	private static var defaultFill = FillSolid(0x000000);
