@@ -15,8 +15,9 @@ You can easily install SVG using haxelib:
 
 To add it to a Lime or OpenFL project, add this to your project file:
 
-    <haxelib name="svg" />
-    
+```xml
+<haxelib name="svg" />
+```
 
 Usage
 =====
@@ -50,13 +51,9 @@ class Main extends Sprite {
 Development Builds
 ==================
 
-Clone the SVG repository:
+Install the haxelib from GitHub:
 
-    git clone https://github.com/openfl/svg
-
-Tell haxelib where your development copy of SVG is installed:
-
-    haxelib dev svg svg
+    haxelib git svg https://github.com/openfl/svg
 
 To return to release builds:
 
