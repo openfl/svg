@@ -2,10 +2,10 @@
   "name": "svg",
   "url": "http://github.com/openfl/svg",
   "license": "MIT",
-  "tags": [ "cpp", "flash" ],
+  "tags": [ "cpp", "flash", "neko", "js" ],
   "description": "Provides support for parsing and rendering SVG content",
-  "version": "1.0.9",
-  "releasenote": "Update for OpenFL 3.6",
+  "version": "1.1.0",
+  "releasenote": "Ongoing parser improvements",
   "contributors": [ "singmajesty", "gamehaxe" ],
   "dependencies": {
   }
