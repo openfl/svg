@@ -136,11 +136,11 @@ class SVGData extends Group {
             var degrees = Std.parseFloat (mRotationMatch.matched (1));
             
             var rotationX = Std.parseFloat (mRotationMatch.matched (2));
-            if (rotationX == null) {
+            if (rotationX == Math.NaN) {
                 rotationX = 0;
             }	            
             var rotationY = Std.parseFloat (mRotationMatch.matched (3));
-            if (rotationY == null) {
+            if (rotationY == Math.NaN) {
                 rotationY = 0;
             }
             
