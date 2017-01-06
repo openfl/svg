@@ -25,7 +25,7 @@ class SVG {
 	}
 	
 	
-	public function render (graphics:Graphics, x:Float = 0, y:Float = 0, width:Int = -1, height:Int = -1) {
+	public function render (graphics:Graphics, x:Float = 0, y:Float = 0, width:Int = -1, height:Int = -1, ?inLayer:String = null) {
 		
 		if (data == null) return;
 		
@@ -40,7 +40,8 @@ class SVG {
 		
 		matrix.translate (x, y);
 		
-		var renderer = new SVGRenderer (data);
+		var renderer = new SVGRenderer (data, inLayer);
+
 		renderer.render (graphics, matrix);
 		
 	}
