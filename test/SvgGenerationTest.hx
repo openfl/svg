@@ -90,7 +90,13 @@ class SvgGenerationTest
     {
         generateAndCompare("matrix-rotated-square.svg", 100, 100);
     }
-    
+
+    @Test
+    public function layerFiltering()
+    {
+        generateAndCompareTo("layer_test1.svg", "layer_test2.svg");
+    }
+
     @BeforeClass
     public function cleanPreviousTestRunResults() {
         
@@ -134,9 +140,16 @@ class SvgGenerationTest
         var pngName = generatePng(svgName, pngWidth, pngHeight);
         compareGeneratedToExpected(svgName, pngName);
     }
-    
+
+    private function generateAndCompareTo(svgName1:String, svgName2:String)
+    {
+        var pngName1 = generatePng(svgName1);
+        var pngName2 = generatePng(svgName2, 0, 0, "red");
+        compareGeneratedPNGs(pngName1, pngName2);
+    }
+
     // Generates a PNG from an SVG at the specified width/height.
-    private function generatePng(svgName:String, pngWidth:Int = 0, pngHeight:Int = 0):String
+    private function generatePng(svgName:String, pngWidth:Int = 0, pngHeight:Int = 0, ?pLayerID:String = null):String
     {
         var svg = new SVG(File.getContent('${IMAGES_PATH}/${svgName}'));
 
@@ -146,6 +159,7 @@ class SvgGenerationTest
         // (this makes it easier to see in the report).
         var width:Int = pngWidth;
         var height:Int = pngHeight;
+        var layerid:String = pLayerID;
         
         if (pngWidth == 0 || pngHeight == 0)
         {
@@ -175,7 +189,7 @@ class SvgGenerationTest
         var backgroundColor = 0x00FFFFFF;
         var shape = new Shape();
         // scale/render the SVG to this size
-        svg.render(shape.graphics, 0, 0, width, height);
+        svg.render(shape.graphics, 0, 0, width, height, layerid);
 
         // generated image size
         var actualBitmapData = new BitmapData(width, height, true, backgroundColor);
@@ -269,6 +283,75 @@ class SvgGenerationTest
         }
 	}
     
+    // Compares 2 generated PNGs
+    private function compareGeneratedPNGs(pngName1:String, pngName2:String)
+    {
+
+        var actualImage1:String = '${GENERATED_IMAGES_PATH}/${pngName1}';
+        var actualBitmapData1:BitmapData = BitmapData.fromFile(actualImage1);
+
+        var actualImage2:String = '${GENERATED_IMAGES_PATH}/${pngName2}';
+        var actualBitmapData2:BitmapData = BitmapData.fromFile(actualImage2);
+        
+        var test = newSvgTest(pngName1);
+        
+        // Calculate the number of pixels that are different from what they should be.
+        // Since we're averaging across the entire image, even if a few pixels are
+        // drastically different, if the overall images are similar, we get a small diff.
+        // We use BitmapData.compare to generate the "diff image" between two images.
+        // The diff image has one non-transparent pixel for every pixel that differs.
+        // Because of the way it calculates transparency, the safest way to know if
+        // there's a diff is to get the pixel RGB values (not RGBA).
+        // To see how this diff image works, just replace any SVG with a coloured rectangle and re-run the tests.
+        var result:Object = actualBitmapData1.compare(actualBitmapData2);
+        var numPixelsThatAreDifferent:Int = 0;
+        
+        if (result == 0)
+        {
+            // Expected match if layers filtered correctly
+            results.passedTests.push(test);
+        }
+        else
+        {
+            var diffPixels = cast(result, BitmapData);
+            
+            for (y in 0 ... diffPixels.height)
+            {
+                for (x in 0 ... diffPixels.width)
+                {
+                    var diffPixel = diffPixels.getPixel(x, y);
+                    // Extract RGB values
+                    var components = getComponents(diffPixel);
+                    var red = components[0];
+                    var green = components[1];
+                    var blue = components[2];
+                    if (red > 0 || green > 0 || blue > 0)
+                    {
+                        numPixelsThatAreDifferent++;
+                    }
+                }
+            }
+            
+            // Average over all pixels in the image
+            var culmulativeDiff:Float = numPixelsThatAreDifferent / (diffPixels.width * diffPixels.height);
+            test.diffPixels = diffPixels;
+            test.diffPercentage = culmulativeDiff;
+            var diffPngFile = pngName1.replace(".png", '-diff.png');
+            var diffFile:String = '${GENERATED_IMAGES_PATH}/${diffPngFile}';
+            File.saveBytes(diffFile, diffPixels.encode(diffPixels.rect, new PNGEncoderOptions()));
+            
+            if (culmulativeDiff >= SVG_DIFF_TOLERANCE_PERCENT)
+            {
+                results.failedTests.push(test);
+                Assert.fail('${pngName2} differs from ${pngName1} by ${Math.round(culmulativeDiff * 100)}% pixels, which is over the threshold of ${SVG_DIFF_TOLERANCE_PERCENT * 100}%');
+            }
+            else
+            {
+                results.passedTests.push(test);
+            }
+        }
+    }
+
     // Given a pixel (0xRRGGBB), return an array [RR, GG, BB]
     // Components are integer values from 0..255
     private function getComponents(pixel:Int):Array<Int>
