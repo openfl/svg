@@ -94,7 +94,7 @@ class SvgGenerationTest
     @Test
     public function layerFiltering()
     {
-        generateAndCompareTo("layer_test1.svg", "layer_test2.svg");
+        generateAndCompareWithLayerFilter("layer_test1.svg", null, "layer_test2.svg", "red");
     }
 
     @BeforeClass
@@ -141,10 +141,10 @@ class SvgGenerationTest
         compareGeneratedToExpected(svgName, pngName);
     }
 
-    private function generateAndCompareTo(svgName1:String, svgName2:String)
+    private function generateAndCompareWithLayerFilter(svgName1:String, layerId1:String, svgName2:String, layerId2:String)
     {
-        var pngName1 = generatePng(svgName1);
-        var pngName2 = generatePng(svgName2, 0, 0, "red");
+        var pngName1 = generatePng(svgName1, 0 ,0, layerId1);
+        var pngName2 = generatePng(svgName2, 0, 0, layerId2);
         compareGeneratedPNGs(pngName1, pngName2);
     }
 
@@ -159,7 +159,7 @@ class SvgGenerationTest
         // (this makes it easier to see in the report).
         var width:Int = pngWidth;
         var height:Int = pngHeight;
-        var layerid:String = pLayerID;
+        var layerId:String = pLayerID;
         
         if (pngWidth == 0 || pngHeight == 0)
         {
@@ -189,7 +189,7 @@ class SvgGenerationTest
         var backgroundColor = 0x00FFFFFF;
         var shape = new Shape();
         // scale/render the SVG to this size
-        svg.render(shape.graphics, 0, 0, width, height, layerid);
+        svg.render(shape.graphics, 0, 0, width, height, layerId);
 
         // generated image size
         var actualBitmapData = new BitmapData(width, height, true, backgroundColor);
@@ -225,60 +225,16 @@ class SvgGenerationTest
             test.expectedWidth = expectedBitmapData.width;
             test.expectedHeight = expectedBitmapData.height;
             
-            // Calculate the number of pixels that are different from what they should be.
-            // Since we're averaging across the entire image, even if a few pixels are
-            // drastically different, if the overall images are similar, we get a small diff.
-            // We use BitmapData.compare to generate the "diff image" between two images.
-            // The diff image has one non-transparent pixel for every pixel that differs.
-            // Because of the way it calculates transparency, the safest way to know if
-            // there's a diff is to get the pixel RGB values (not RGBA).
-            // To see how this diff image works, just replace any SVG with a coloured rectangle and re-run the tests.
             var result:Object = actualBitmapData.compare(expectedBitmapData);
-            var numPixelsThatAreDifferent:Int = 0;
-            
-            if (result == 0)
+            var culmulativeDiff = comparePixels(result, test, svgName.replace(".svg", '-${test.expectedWidth}x${test.expectedHeight}-diff.png'));
+            if (culmulativeDiff >= SVG_DIFF_TOLERANCE_PERCENT)
             {
-                // A rare, but awesome, exact match!
-                results.passedTests.push(test);
+                results.failedTests.push(test);
+                Assert.fail('${svgName} has ${Math.round(culmulativeDiff * 100)}% pixels different, which is over the threshold of ${SVG_DIFF_TOLERANCE_PERCENT * 100}%');
             }
             else
             {
-                var diffPixels = cast(result, BitmapData);
-                
-                for (y in 0 ... diffPixels.height)
-                {
-                    for (x in 0 ... diffPixels.width)
-                    {
-                        var diffPixel = diffPixels.getPixel(x, y);
-                        // Extract RGB values
-                        var components = getComponents(diffPixel);
-                        var red = components[0];
-                        var green = components[1];
-                        var blue = components[2];
-                        if (red > 0 || green > 0 || blue > 0)
-                        {
-                            numPixelsThatAreDifferent++;                        
-                        }                        
-                    }
-                }
-                
-                // Average over all pixels in the image
-                var culmulativeDiff:Float = numPixelsThatAreDifferent / (diffPixels.width * diffPixels.height);
-                test.diffPixels = diffPixels;
-                test.diffPercentage = culmulativeDiff;
-                var diffPngFile = svgName.replace(".svg", '-${test.expectedWidth}x${test.expectedHeight}-diff.png');
-                var diffFile:String = '${GENERATED_IMAGES_PATH}/${diffPngFile}';
-                File.saveBytes(diffFile, diffPixels.encode(diffPixels.rect, new PNGEncoderOptions()));                
-                
-                if (culmulativeDiff >= SVG_DIFF_TOLERANCE_PERCENT)
-                {
-                    results.failedTests.push(test);
-                    Assert.fail('${svgName} has ${Math.round(culmulativeDiff * 100)}% pixels different, which is over the threshold of ${SVG_DIFF_TOLERANCE_PERCENT * 100}%');                
-                }
-                else
-                {
-                    results.passedTests.push(test);
-                } 
+                results.passedTests.push(test);
             }
         }
 	}
@@ -295,21 +251,34 @@ class SvgGenerationTest
         
         var test = newSvgTest(pngName1);
         
-        // Calculate the number of pixels that are different from what they should be.
-        // Since we're averaging across the entire image, even if a few pixels are
-        // drastically different, if the overall images are similar, we get a small diff.
-        // We use BitmapData.compare to generate the "diff image" between two images.
-        // The diff image has one non-transparent pixel for every pixel that differs.
-        // Because of the way it calculates transparency, the safest way to know if
-        // there's a diff is to get the pixel RGB values (not RGBA).
-        // To see how this diff image works, just replace any SVG with a coloured rectangle and re-run the tests.
         var result:Object = actualBitmapData1.compare(actualBitmapData2);
+        var culmulativeDiff = comparePixels(result, test, pngName1.replace(".png", '-diff.png'));
+        if (culmulativeDiff >= SVG_DIFF_TOLERANCE_PERCENT)
+        {
+            results.failedTests.push(test);
+            Assert.fail('${pngName2} differs from ${pngName1} by ${Math.round(culmulativeDiff * 100)}% pixels, which is over the threshold of ${SVG_DIFF_TOLERANCE_PERCENT * 100}%');
+        }
+        else
+        {
+            results.passedTests.push(test);
+        }
+    }
+
+    // Calculate the number of pixels that are different from what they should be.
+    // Since we're averaging across the entire image, even if a few pixels are
+    // drastically different, if the overall images are similar, we get a small diff.
+    // We use BitmapData.compare to generate the "diff image" between two images.
+    // The diff image has one non-transparent pixel for every pixel that differs.
+    // Because of the way it calculates transparency, the safest way to know if
+    // there's a diff is to get the pixel RGB values (not RGBA).
+    // To see how this diff image works, just replace any SVG with a coloured rectangle and re-run the tests.
+    private function comparePixels(result:Object, test:SvgTest, diffFilename:String):Float {
         var numPixelsThatAreDifferent:Int = 0;
         
         if (result == 0)
         {
-            // Expected match if layers filtered correctly
-            results.passedTests.push(test);
+            // A rare, but awesome, exact match!
+            return 0;
         }
         else
         {
@@ -336,19 +305,10 @@ class SvgGenerationTest
             var culmulativeDiff:Float = numPixelsThatAreDifferent / (diffPixels.width * diffPixels.height);
             test.diffPixels = diffPixels;
             test.diffPercentage = culmulativeDiff;
-            var diffPngFile = pngName1.replace(".png", '-diff.png');
-            var diffFile:String = '${GENERATED_IMAGES_PATH}/${diffPngFile}';
+            var diffFile:String = '${GENERATED_IMAGES_PATH}/${diffFilename}';
             File.saveBytes(diffFile, diffPixels.encode(diffPixels.rect, new PNGEncoderOptions()));
             
-            if (culmulativeDiff >= SVG_DIFF_TOLERANCE_PERCENT)
-            {
-                results.failedTests.push(test);
-                Assert.fail('${pngName2} differs from ${pngName1} by ${Math.round(culmulativeDiff * 100)}% pixels, which is over the threshold of ${SVG_DIFF_TOLERANCE_PERCENT * 100}%');
-            }
-            else
-            {
-                results.passedTests.push(test);
-            }
+            return culmulativeDiff;
         }
     }
 
