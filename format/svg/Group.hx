@@ -16,8 +16,11 @@ class Group
          switch(child)
          {
             case DisplayGroup(group):
-               if (group.name==inName)
+               if (group.name==inName) {
                   return group;
+               }
+               var inGroup:Group = group.findGroup(inName);
+               if(inGroup != null) return inGroup;
             default:
          }
       return null;

@@ -97,6 +97,12 @@ class SvgGenerationTest
         generateAndCompareWithLayerFilter("layer_test1.svg", null, "layer_test2.svg", "red");
     }
 
+    @Test
+    public function nestedLayerFiltering()
+    {
+        generateAndCompareWithLayerFilter("layer_test2.svg", "red", "nested_layer.svg", "red");
+    }
+
     @BeforeClass
     public function cleanPreviousTestRunResults() {
         
