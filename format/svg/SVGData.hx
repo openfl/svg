@@ -538,6 +538,8 @@ class SVGData extends Group {
 				
 			}
 
+			if (el.exists("display") && el.get("display") == "none") continue;
+
 			if (name == "defs") {
 				
 				loadDefs (el);
