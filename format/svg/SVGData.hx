@@ -1,12 +1,12 @@
 package format.svg;
 
-import flash.geom.Matrix;
-import flash.geom.Rectangle;
-import flash.display.GradientType;
-import flash.display.Graphics;
-import flash.display.SpreadMethod;
-import flash.display.CapsStyle;
-import flash.display.JointStyle;
+import openfl.geom.Matrix;
+import openfl.geom.Rectangle;
+import openfl.display.GradientType;
+import openfl.display.Graphics;
+import openfl.display.SpreadMethod;
+import openfl.display.CapsStyle;
+import openfl.display.JointStyle;
 import format.svg.Grad;
 import format.svg.Group;
 import format.svg.FillType;

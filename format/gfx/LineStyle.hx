@@ -1,8 +1,8 @@
 package format.gfx;
 
-import flash.display.LineScaleMode;
-import flash.display.CapsStyle;
-import flash.display.JointStyle;
+import openfl.display.LineScaleMode;
+import openfl.display.CapsStyle;
+import openfl.display.JointStyle;
 
 class LineStyle
 {
