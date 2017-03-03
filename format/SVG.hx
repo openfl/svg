@@ -1,9 +1,9 @@
 package format;
 
 
-import flash.display.Graphics;
-import flash.geom.Matrix;
-import flash.geom.Rectangle;
+import openfl.display.Graphics;
+import openfl.geom.Matrix;
+import openfl.geom.Rectangle;
 import format.svg.SVGData;
 import format.svg.SVGRenderer;
 
