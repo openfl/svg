@@ -1,6 +1,7 @@
 import massive.munit.TestSuite;
 
 import SvgGenerationTest;
+import MacroTest;
 
 /**
  * Auto generated Test Suite for MassiveUnit.
@@ -15,5 +16,6 @@ class TestSuite extends massive.munit.TestSuite
 		super();
 
 		add(SvgGenerationTest);
+		add(MacroTest);
 	}
 }
