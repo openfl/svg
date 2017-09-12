@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ "cpp", "flash", "neko", "js" ],
   "description": "Provides support for parsing and rendering SVG content",
-  "version": "1.1.1",
-  "releasenote": "Compile fix",
+  "version": "1.1.2",
+  "releasenote": "Change to OpenFL packages, group and rotation render fix",
   "contributors": [ "singmajesty", "gamehaxe" ],
   "dependencies": {
   }
