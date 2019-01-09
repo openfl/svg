@@ -195,6 +195,12 @@ class SVGData extends Group {
 			return parseHex(s.substr(1));
 			
 		}
+				
+		if (mRGBMatch.match (s)) {
+			
+			return parseRGBMatch(mRGBMatch);
+			
+		}
 		
 		return Std.parseInt (s);
 		
