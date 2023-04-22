@@ -62,21 +62,30 @@ class SVGData extends Group {
 		width = getFloatStyle ("width", svg, null, 0.0);
 		height = getFloatStyle ("height", svg, null, 0.0);
 		
-		if (width == 0 && height == 0)
-			width = height = 400;
-		else if (width == 0)
+		if (width == 0)
 			width = height;
 		else if (height == 0)
 			height = width;
 
-		var viewBox = new Rectangle(0, 0, width, height);
+		var viewBox:Rectangle;
 
-		if (svg.exists("viewBox")) {
-
+		if (svg.exists("viewBox")) 
+		{
 			var vbox = svg.get("viewBox");
 			var params = vbox.indexOf(",") != -1 ? vbox.split(",") : vbox.split(" ");
 			viewBox = new Rectangle( trimToFloat(params[0]), trimToFloat(params[1]), trimToFloat(params[2]), trimToFloat(params[3]) );
-
+		
+			if (width == 0 && height == 0)
+			{
+				width = viewBox.width;
+				height = viewBox.height;
+			}
+		}
+		else
+		{
+			if (width == 0 && height == 0)
+				width = height = 400;
+			viewBox = new Rectangle(0, 0, width, height);
 		}
 
 		loadGroup(this, svg, new Matrix (1, 0, 0, 1, -viewBox.x, -viewBox.y), null);
