@@ -27,7 +27,7 @@ jobs:
 
       - uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: 4.3.6
+          haxe-version: 4.3.3
 
       - name: Set HAXEPATH
         run: |
