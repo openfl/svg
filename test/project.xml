@@ -10,7 +10,6 @@
 	<haxelib name="openfl"/>
 	<haxelib name="utest"/>
 
-	<assets path="images" embed="false" if="sys"/>
-	<assets path="images" embed="true" unless="sys"/>
+	<assets path="images"/>
 	<template path="templates" if="html5 openfl < '9.4.0'"/>
 </project>
