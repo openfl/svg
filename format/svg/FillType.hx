@@ -2,8 +2,8 @@ package format.svg;
 
 enum FillType
 {
-   FillGrad(grad:Grad);
-   FillSolid(colour:Int);
-   FillNone;
+    FillGrad(grad:Grad);
+    FillSolid(colour:Int);
+    FillNone;
 }
 
