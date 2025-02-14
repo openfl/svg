@@ -50,6 +50,34 @@ jobs:
           path: docs
           if-no-files-found: error
 
+  unit-test-neko:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.3.3
+
+      - name: Set HAXEPATH
+        run: |
+          echo "HAXEPATH=$HAXE_STD_PATH/.." >> $GITHUB_ENV
+
+      - name: Install Haxe dependencies
+        run: |
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install utest --quiet
+
+      - name: Setup environment
+        run: |
+          haxelib dev svg ${{ github.workspace }}
+
+      - name: Run tests on Neko
+        working-directory: test
+        run: |
+          haxelib run openfl test neko
+
   unit-test-hashlink:
     # AL init fails on both windows and ubuntu
     # macos-14 is arm64, which setup-haxe doesn't support yet
