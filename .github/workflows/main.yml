@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/upload-artifact@v4
         with:
-          name: away3d-haxelib
+          name: svg-haxelib
           path: |
             ./
             !scripts/
