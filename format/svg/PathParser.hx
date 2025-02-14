@@ -263,7 +263,7 @@ class PathParser {
                 case SQUAD:
                     var rx = prevX();
                     var ry = prevY();
-                    return new QuadraticSegment( rx*2-prevCX(), rx*2-prevCY(),a[2], a[3] );
+                    return new QuadraticSegment( rx*2-prevCX(), rx*2-prevCY(),a[0], a[1] );
                 case SQUADR:
                     var rx = prevX();
                     var ry = prevY();
