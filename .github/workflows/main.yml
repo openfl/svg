@@ -18,6 +18,38 @@ jobs:
             !.git/
           if-no-files-found: error
 
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.5
+
+      - name: Set HAXEPATH
+        run: |
+          echo "HAXEPATH=$HAXE_STD_PATH/.." >> $GITHUB_ENV
+
+      - name: Install Haxe dependencies
+        run: |
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install dox --quiet
+          haxelib dev svg ${{ github.workspace }}
+
+      - name: Build docs
+        working-directory: scripts
+        run: |
+          haxe docs.hxml
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: svg-docs
+          path: docs
+          if-no-files-found: error
+
   unit-test-hashlink:
     # AL init fails on both windows and ubuntu
     # macos-14 is arm64, which setup-haxe doesn't support yet
