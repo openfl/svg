@@ -1,4 +1,4 @@
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.md) [![Haxelib Version](https://img.shields.io/github/tag/openfl/svg.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/svg) ![build status](https://api.travis-ci.org/openfl/svg.svg)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.md) [![Haxelib Version](https://img.shields.io/github/tag/openfl/svg.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/svg) [![Build Status](https://img.shields.io/github/actions/workflow/status/openfl/svg/main.yml?branch=master)](https://github.com/openfl/svg/actions)
 
 SVG
 ===
