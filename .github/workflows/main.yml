@@ -52,6 +52,9 @@ jobs:
 
   unit-test-neko:
     runs-on: ubuntu-latest
+    env:
+      SDL_VIDEODRIVER: "dummy"
+      SDL_AUDIODRIVER: "disk"
     steps:
       - uses: actions/checkout@v4
 
