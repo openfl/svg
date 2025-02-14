@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	<meta title="SVG Tests"/>
+	<app main="TestMain" file="SvgTests"/>
+	<window hidden="true"/>
+
+	<source path="src"/>
+	<source path=".."/>
+	
+	<haxelib name="openfl"/>
+	<haxelib name="utest"/>
+
+	<assets path="images" embed="false" if="sys"/>
+	<assets path="images" embed="true" unless="sys"/>
+	<template path="templates" if="html5 openfl < '9.4.0'"/>
+</project>

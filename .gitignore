@@ -4,3 +4,4 @@ build
 report
 *.html
 generated
+test/bin/

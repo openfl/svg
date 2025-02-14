@@ -1,9 +1,3 @@
-package;
-
-import massive.munit.util.Timer;
-import massive.munit.Assert;
-import massive.munit.async.AsyncFactory;
-
 import format.SVG;
 
 import openfl.Assets;
@@ -13,22 +7,28 @@ import openfl.display.BitmapData;
 import openfl.display.Bitmap;
 import openfl.utils.Object;
 
+#if sys
 import sys.io.File;
+#end
+
+import utest.Assert;
+import utest.Test;
 
 using StringTools;
 
 /**
-* Tests SVG generation. We run through a list of known (working) SVGs, generating
-* them as (usually 256x256, unless the source is smaller) images, and comparing
-* those to expected PNGs.
-* To aid troubleshooting, this test generates a generation.html file which
-* shows both expected and actual values side-by-side, so it's easy to see what
-* went wrong in the SVG generation.
-*/
-class SvgGenerationTest
+    Tests SVG generation. We run through a list of known (working) SVGs,
+    generating them as (usually 256x256, unless the source is smaller) images,
+    and comparing those to expected PNGs.
+
+    To aid troubleshooting, this test generates a generation.html file which
+    shows both expected and actual values side-by-side, so it's easy to see what
+    went wrong in the SVG generation.
+**/
+class SvgGenerationTest extends Test
 {
 	private static inline var RESULTS_HTML_FILE:String = "svg-tests.html";
-	private static inline var IMAGES_PATH:String = "test/images";
+	private static inline var IMAGES_PATH:String = "images";
 	private static inline var GENERATED_IMAGES_PATH:String = "generated";
     // Maximum size we render the expected image to
     private static inline var MAX_IMAGE_SIZE:Int = 256;
@@ -39,84 +39,84 @@ class SvgGenerationTest
     
     private var results:GenerationResults;
     
-	public function new() {	}
+	public function new()
+    {
+        super();
+    }
     
-    @Test
-	public function ubuntuLogoRendersCorrectly()
+	public function testUbuntuLogoRendersCorrectly()
 	{
         generateAndCompare("ubuntu-logo-orange.svg", 256, 256);
 	}
     
-    @Test
-    public function allRightsReservedRendersCorrectly()
+    public function testAllRightsReservedRendersCorrectly()
     {
         // This file is a small circle; it has a lot of anti-aliasing artifacts in the diff.
         // This might be problematic. Hence, we render a larger version (4x).
         generateAndCompare("all_rights_reserved_white.svg", 256, 256);
     }
     
-    @Test
-    public function fancySunIconRendersCorrectly()
+    public function testFancySunIconRendersCorrectly()
     {
         generateAndCompare("fancy-sun.svg");
     }
 
-    @Test
-    public function scaleRectStrokeWidth()
+    public function testScaleRectStrokeWidth()
     {
       generateAndCompare("scale_rect.svg", 256, 256);
     }
 
-    @Test
-    public function alphaChannelAnd3CharHexColors()
+    public function testAlphaChannelAnd3CharHexColors()
     {
       generateAndCompare("alphachannel.svg", 100, 100);
     }
 
-    @Test
-    public function fillColorRGB()
+    public function testFillColorRGB()
     {
       generateAndCompare("fill_rgb.svg", 100, 100);
     }
     
-    @Test
-    public function rotatedSquareRendersRotated()
+    public function testRotatedSquareRendersRotated()
     {
         generateAndCompare("rotated-square.svg", 100, 100);
     }
 
-    @Test
-    public function matrixRotatedSquare()
+    public function testMatrixRotatedSquare()
     {
         generateAndCompare("matrix-rotated-square.svg", 100, 100);
     }
 
-    @Test
-    public function layerFiltering()
+    public function testLayerFiltering()
     {
         generateAndCompareWithLayerFilter("layer_test1.svg", null, "layer_test2.svg", "red");
     }
 
-    @Test
-    public function nestedLayerFiltering()
+    public function testNestedLayerFiltering()
     {
         generateAndCompareWithLayerFilter("layer_test2.svg", "red", "nested_layer.svg", "red");
     }
 
-    @Test
-    public function disabledLayers()
+    public function testDisabledLayers()
     {
         generateAndCompareWithLayerFilter("layer_test1.svg", null, "disabled_test1.svg", null);
         generateAndCompareWithLayerFilter("layer_test1.svg", null, "disabled_test2.svg", null);
     }
 
-    @BeforeClass
-    public function cleanPreviousTestRunResults() {
+    public function setupClass():Void {
+        cleanPreviousTestRunResults();
+    }
+
+    public function teardownClass():Void {
+        createHtmlReport();
+    }
+
+    private function cleanPreviousTestRunResults() {
         
         this.results = {
             passedTests: new Array<SvgTest>(), failedTests: new Array<SvgTest>()
         };
         
+        #if sys
         // Delete the old report
         if (sys.FileSystem.exists(RESULTS_HTML_FILE))
         {
@@ -131,10 +131,10 @@ class SvgGenerationTest
 		} else {
 			sys.FileSystem.createDirectory(GENERATED_IMAGES_PATH);
 		}
+        #end
     }
     
-    @AfterClass
-    public function createHtmlReport() {
+    private function createHtmlReport() {
         var total = results.failedTests.length + results.passedTests.length;
         
         var html:String = '<html><head>
@@ -145,26 +145,48 @@ class SvgGenerationTest
                 
         html += "</body></html>";
         
+        #if sys
         sys.io.File.saveContent(RESULTS_HTML_FILE, html);
+        #else
+        trace(html);
+        #end
     }
     
     private function generateAndCompare(svgName:String, pngWidth:Int = 0, pngHeight:Int = 0)
     {
+        #if sys
         var pngName = generatePng(svgName, pngWidth, pngHeight);
         compareGeneratedToExpected(svgName, pngName);
+        #else
+        var svgData = openfl.Assets.getText('${IMAGES_PATH}/${svgName}');
+        var actualBitmapData = generateBitmap(svgName, svgData, pngWidth, pngHeight);
+        var pngName = svgName.replace(".svg", '-${actualBitmapData.width}x${actualBitmapData.height}.png');
+        var expectedBitmapData = openfl.Assets.getBitmapData('${IMAGES_PATH}/${pngName}');
+        compareGeneratedBitmapToExpectedBitmap(svgName, pngName, expectedBitmapData, actualBitmapData);
+        #end
     }
 
     private function generateAndCompareWithLayerFilter(svgName1:String, layerId1:String, svgName2:String, layerId2:String)
     {
+        #if sys
         var pngName1 = generatePng(svgName1, 0 ,0, layerId1);
         var pngName2 = generatePng(svgName2, 0, 0, layerId2);
         compareGeneratedPNGs(pngName1, pngName2);
+        #else
+        var svgData1 = openfl.Assets.getText('${IMAGES_PATH}/${svgName1}');
+        var svgData2 = openfl.Assets.getText('${IMAGES_PATH}/${svgName1}');
+        var bitmap1 = generateBitmap(svgName1, svgData1);
+        var bitmap2 = generateBitmap(svgName2, svgData2);
+        var pngName1 = svgName1.replace(".svg", '-${bitmap1.width}x${bitmap1.height}.png');
+        var pngName2 = svgName2.replace(".svg", '-${bitmap2.width}x${bitmap2.height}.png');
+        compareGeneratedBitmaps(pngName1, pngName2, bitmap1, bitmap2);
+        #end
     }
 
-    // Generates a PNG from an SVG at the specified width/height.
-    private function generatePng(svgName:String, pngWidth:Int = 0, pngHeight:Int = 0, ?pLayerID:String = null):String
+    // Generates a BitmapData from an SVG at the specified width/height.
+    private function generateBitmap(svgName:String, svgData:String, pngWidth:Int = 0, pngHeight:Int = 0, ?pLayerID:String = null):BitmapData
     {
-        var svg = new SVG(File.getContent('${IMAGES_PATH}/${svgName}'));
+        var svg = new SVG(svgData);
 
         // Render to the size of the PNG image representing our "expected" value.
         // If the user passed in a width/height, we use that. Otherwise, we use
@@ -194,9 +216,6 @@ class SvgGenerationTest
             height = 256;
             width = Math.round(width * scale);
         }
-
-        var pngFileName = svgName.replace(".svg", '-${width}x${height}.png');
-        var outputFile = '${GENERATED_IMAGES_PATH}/${pngFileName}';
         
         // Fully-transparent and white
         var backgroundColor = 0x00FFFFFF;
@@ -207,12 +226,27 @@ class SvgGenerationTest
         // generated image size
         var actualBitmapData = new BitmapData(width, height, true, backgroundColor);
         actualBitmapData.draw(shape);
+        return actualBitmapData;
+    }
+
+    #if sys
+    // Generates a PNG file from an SVG at the specified width/height.
+    private function generatePng(svgName:String, pngWidth:Int = 0, pngHeight:Int = 0, ?pLayerID:String = null):String
+    {
+        var svgData = File.getContent('${IMAGES_PATH}/${svgName}');
+
+        var actualBitmapData = generateBitmap(svgName, svgData, pngWidth, pngHeight, pLayerID);
+
+        var pngFileName = svgName.replace(".svg", '-${actualBitmapData.width}x${actualBitmapData.height}.png');
+        var outputFile = '${GENERATED_IMAGES_PATH}/${pngFileName}';
 
         File.saveBytes(outputFile, actualBitmapData.encode(actualBitmapData.rect, new PNGEncoderOptions()));
         
         return pngFileName;
     }
+    #end
 
+    #if sys
     // Compares pixels from the generated PNG to the hand-made PNG.
 	private function compareGeneratedToExpected(svgName:String, pngName:String)
 	{
@@ -224,7 +258,14 @@ class SvgGenerationTest
         var expectedBitmapData:BitmapData = BitmapData.fromFile(expectedImage);
         var actualImage:String = '${GENERATED_IMAGES_PATH}/${pngName}';
         var actualBitmapData:BitmapData = BitmapData.fromFile(actualImage);
+
+        compareGeneratedBitmapToExpectedBitmap(svgName, pngName, expectedBitmapData, actualBitmapData);
+    }
+    #end
         
+    // Compares pixels from the generated BitmapData to the hand-made BitmapData.
+	private function compareGeneratedBitmapToExpectedBitmap(svgName:String, pngName:String, expectedBitmapData:BitmapData, actualBitmapData:BitmapData)
+    {
         var test = newSvgTest(svgName);
         
         if (expectedBitmapData.width != actualBitmapData.width || expectedBitmapData.height != actualBitmapData.height)
@@ -248,20 +289,14 @@ class SvgGenerationTest
             else
             {
                 results.passedTests.push(test);
+                Assert.pass();
             }
         }
 	}
     
-    // Compares 2 generated PNGs
-    private function compareGeneratedPNGs(pngName1:String, pngName2:String)
+    // Compares 2 generated bitmaps
+    private function compareGeneratedBitmaps(pngName1:String, pngName2:String, actualBitmapData1:BitmapData, actualBitmapData2:BitmapData)
     {
-
-        var actualImage1:String = '${GENERATED_IMAGES_PATH}/${pngName1}';
-        var actualBitmapData1:BitmapData = BitmapData.fromFile(actualImage1);
-
-        var actualImage2:String = '${GENERATED_IMAGES_PATH}/${pngName2}';
-        var actualBitmapData2:BitmapData = BitmapData.fromFile(actualImage2);
-        
         var test = newSvgTest(pngName1);
         
         var result:Object = actualBitmapData1.compare(actualBitmapData2);
@@ -274,7 +309,20 @@ class SvgGenerationTest
         else
         {
             results.passedTests.push(test);
+            Assert.pass();
         }
+    }
+    
+    // Compares 2 generated PNGs
+    private function compareGeneratedPNGs(pngName1:String, pngName2:String)
+    {
+        var actualImage1:String = '${GENERATED_IMAGES_PATH}/${pngName1}';
+        var actualBitmapData1:BitmapData = BitmapData.fromFile(actualImage1);
+
+        var actualImage2:String = '${GENERATED_IMAGES_PATH}/${pngName2}';
+        var actualBitmapData2:BitmapData = BitmapData.fromFile(actualImage2);
+
+        compareGeneratedBitmaps(pngName1, pngName2, actualBitmapData1, actualBitmapData2);
     }
 
     // Calculate the number of pixels that are different from what they should be.
@@ -319,7 +367,9 @@ class SvgGenerationTest
             test.diffPixels = diffPixels;
             test.diffPercentage = culmulativeDiff;
             var diffFile:String = '${GENERATED_IMAGES_PATH}/${diffFilename}';
+            #if sys
             File.saveBytes(diffFile, diffPixels.encode(diffPixels.rect, new PNGEncoderOptions()));
+            #end
             
             return culmulativeDiff;
         }
@@ -368,6 +418,7 @@ class SvgGenerationTest
 				<td><img src="${IMAGES_PATH}/${pngFile}" /></td>
 				<td><img src="${GENERATED_IMAGES_PATH}/${pngFile}" /></td>';
             var diffFilePath = '${GENERATED_IMAGES_PATH}/${diffFile}';
+            #if sys
             if (sys.FileSystem.exists(diffFilePath))
             {
 				html += '<td><img src="${GENERATED_IMAGES_PATH}/${diffFile}" /></td>';
@@ -376,6 +427,7 @@ class SvgGenerationTest
             {
                 html += '<td>(No difference)</td>';
             }
+            #end
             
             html += '<td>${test.diffPercentage * 100}%</td></tr>';
 		}
