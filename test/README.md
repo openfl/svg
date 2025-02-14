@@ -2,7 +2,16 @@
 
 `svg` includes unit tests. These tests render SVGs at different sizes, and compare those images against known, "good" versions. If the images are similar enough, the test passes; otherwise, they fail.
 
-To run the tests, run `haxe test.hxml`. This generates an `svg-tests.html` file in the repository root, which shows a row per image. For each row, it displays:
+To run the tests, run of the following commands.
+
+- Windows: `openfl test windows`
+- macOS: `openfl test windows`
+- Linux: `openfl test linux`
+- Neko: `openfl test neko`
+- HashLink: `openfl test hl`
+
+On Haxe `sys` targets, this generates an `svg-tests.html` file in the repository root, which shows a row per image. For each row, it displays:
+
 - The SVG
 - The actual (expected) PNG rendering
 - The rendered PNG version
@@ -17,9 +26,8 @@ To add a new test, you need to:
 - Open the SVG in GIMP, and render it to PNG at whatever size you want to render the SVG to. Save it with the filename `<pngname>-<width>x<height>.png` (eg. `apple-64x64.png`).
 - Open up `test/SvgGeneration.hx` and add a new test. Something like this:
 
-```
-@Test
-public function appleScalesUpCorrectly()
+```haxe
+public function testAppleScalesUpCorrectly()
 {
     generateAndCompare("apple.svg"); // 56x56 (SVG size)
     generateAndCompare("apple.svg", 256, 256);
@@ -28,6 +36,7 @@ public function appleScalesUpCorrectly()
 ```
 
 This sample test renders `apple.svg` three times: at its original size (56x56), at 256x256, and 137x137. You need to add three new files to the `test/images` directory:
+
 - `apple-56x56.png`
 - `apple-137x137.png`
 - `apple-256x256.png`
