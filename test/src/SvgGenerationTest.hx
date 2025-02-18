@@ -61,6 +61,11 @@ class SvgGenerationTest extends Test
         generateAndCompare("arc-rotate.svg");
     }
     
+    public function testArcRadiusTooSmallRendersCorrectly()
+    {
+        generateAndCompare("arc-radius-too-small.svg");
+    }
+    
     public function testFancySunIconRendersCorrectly()
     {
         generateAndCompare("fancy-sun.svg");

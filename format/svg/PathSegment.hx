@@ -270,6 +270,14 @@ class ArcSegment extends PathSegment
         var ry2 = ry*ry;
         var x1_2 = x1_*x1_;
         var y1_2 = y1_*y1_;
+        var cr = x1_2/rx2 + y1_2/ry2;
+        if (cr > 1.0) {
+            var s = Math.sqrt(cr);
+            rx = s * rx;
+            ry = s * ry;
+            rx2 = rx * rx;
+            ry2 = ry * ry;
+        }
         var s = (rx2*ry2 - rx2*y1_2 - ry2*x1_2) /
                     (rx2*y1_2 + ry2*x1_2 );
         if (s<0)
