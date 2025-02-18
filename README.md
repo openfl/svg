@@ -63,4 +63,4 @@ To return to release builds:
 Running SVG's Tests
 ===================
 
-`svg` includes some tests that render SVGs and make sure they look the way they're supposed to. These tests run automatically with each build/commit. To run them manually, run `haxe test.hxml`. For more information, check `README.md` in `test`.
+`svg` includes some tests that render SVGs and make sure they look the way they're supposed to. These tests run automatically with each build/commit. For more information about running them manually, see [test/README.md](test/README.md).
