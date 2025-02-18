@@ -12,6 +12,7 @@ jobs:
           name: svg-haxelib
           path: |
             ./
+            !test/bin/
             !scripts/
             !haxe-*-*/
             !neko-*-*/
