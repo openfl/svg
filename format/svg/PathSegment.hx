@@ -299,67 +299,76 @@ class ArcSegment extends PathSegment
         else if (!fS && dtheta>0)
             dtheta-=2.0*Math.PI;
 
-
-        var m = ioContext.matrix;
-        //    var px = cx+cos*rx;
-        //    var py = cy+sin*ry;
-        //    m.a*px+m.c*py+m.tx    m.b*px+m.d*py+m.ty
-        //  Combined
-        //    x = m.a(cx+cos*rx) + m.c(cy+sin*ry) + m.tx
-        //      = m.a*rx * cos +  m.c*ry*sin + m.a*cx+m.c*cy + m.tx
-        //      = Txc cos +  Txc sin + Tx0
-        //    y = m.b(cx+cos*rx) + m.d(cy+sin*ry) + m.ty
-        //      = m.b*rx * cos +  m.d*ry*sin + m.b*cx+m.d*cy + m.ty
-        //      = Tyc cos +  Tys sin + Ty0
-        //
-
-        var Txc:Float;
-        var Txs:Float;
-        var Tx0:Float;
-        var Tyc:Float;
-        var Tys:Float;
-        var Ty0:Float;
-        if (m!=null)
+        drawCurves(inGfx, ioContext, cx, cy, theta, dtheta, rx, ry, phi);
+    }
+		
+    // Copyright (c) 2008 The Degrafa Team
+    // convertToCurves() in com.degrafa.geometry.utilities.ArcUtils.as
+    // SPDX-License-Identifier: MIT
+    private inline function drawCurves(inGfx:Gfx, ioContext:RenderContext, x:Float, y:Float, startAngle:Float, arcAngle:Float, xRadius:Float, yRadius:Float, xAxisRotation:Float = 0):Void
+    {
+        // Circumvent drawing more than is needed
+        if (Math.abs(arcAngle) > Math.PI) 
         {
-            Txc = m.a*rx;
-            Txs = m.c*ry;
-            Tx0 = m.a*cx + m.c*cy + m.tx;
-            Tyc = m.b*rx;
-            Tys = m.d*ry;
-            Ty0 = m.b*cx + m.d*cy + m.ty;
-        }
-        else
-        {
-            Txc = rx;
-            Txs = 0;
-            Tx0 = cx+m.tx;
-            Tyc = 0;
-            Tys = ry;
-            Ty0 = cy+m.ty;
+            arcAngle = Math.PI;
         }
 
-        var len = Math.abs(dtheta)*Math.sqrt(Txc*Txc + Txs*Txs + Tyc*Tyc + Tys*Tys);
-        // TODO: Do as series of quadratics ...
-        len *= 5;
-        var steps = Math.round(len);
+        // Draw in a maximum of 45 degree segments. First we calculate how many 
+        // segments are needed for our arc.
+        var segs:Int = Math.ceil(Math.abs(arcAngle) / (Math.PI / 4.0));
         
-
-        if (steps>1)
-        {
-            dtheta /= steps;
-            for(i in 1...steps-1)
+        // Now calculate the sweep of each segment
+        var segAngle:Float = arcAngle / segs;
+        
+        var currentAngle:Float = startAngle;
+        
+        // Draw as 45 degree segments
+        if (segs > 0) 
+        {				
+            var beta:Float = (xAxisRotation) * Math.PI / 180.0;
+            var sinbeta:Float = Math.sin(beta);
+            var cosbeta:Float = Math.cos(beta);
+            
+            var m:Matrix = ioContext.matrix;
+            var cx:Float;
+            var cy:Float;
+            var x1:Float;
+            var y1:Float;
+            
+            // Loop for drawing arc segments
+            for (i in 0...segs) 
             {
-                var c = Math.cos(theta);
-                var s = Math.sin(theta);
-                theta+=dtheta;
-                inGfx.lineTo(Txc*c + Txs*s + Tx0,   Tyc*c + Tys*s + Ty0);
+                currentAngle += segAngle;
+                
+                var sinangle:Float = Math.sin(currentAngle-(segAngle/2));
+                var cosangle:Float = Math.cos(currentAngle-(segAngle/2));
+                
+                var div:Float = Math.cos(segAngle/2);
+                cx = x + (xRadius * cosangle * cosbeta - yRadius * sinangle * sinbeta) / div; //Why divide by Math.cos(segAngle/2)?
+                cy = y + (xRadius * cosangle * sinbeta + yRadius * sinangle * cosbeta) / div; //Why divide by Math.cos(segAngle/2)?
+
+                if (m != null)
+                {
+                    cx = cx * m.a + cy * m.c + m.tx;
+                    cy = cx * m.b + cy * m.d + m.ty;
+                }
+                
+                sinangle = Math.sin(currentAngle);
+                cosangle = Math.cos(currentAngle);
+                
+                x1 = x + (xRadius * cosangle * cosbeta - yRadius * sinangle * sinbeta);
+                y1 = y + (xRadius * cosangle * sinbeta + yRadius * sinangle * cosbeta);
+
+                if (m != null)
+                {
+                    x1 = x1 * m.a + y1 * m.c + m.tx;
+                    y1 = x1 * m.b + y1 * m.d + m.ty;
+                }
+                
+                inGfx.curveTo(cx, cy, x1, y1);
             }
         }
-        inGfx.lineTo(ioContext.lastX, ioContext.lastY);
     }
+
     override public function getType() : Int { return PathSegment.ARC; }
 }
-
-
-
-

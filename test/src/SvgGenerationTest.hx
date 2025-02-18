@@ -56,6 +56,11 @@ class SvgGenerationTest extends Test
         generateAndCompare("all_rights_reserved_white.svg", 256, 256);
     }
     
+    public function testArcRotateRendersCorrectly()
+    {
+        generateAndCompare("arc-rotate.svg");
+    }
+    
     public function testFancySunIconRendersCorrectly()
     {
         generateAndCompare("fancy-sun.svg");
