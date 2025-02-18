@@ -542,6 +542,36 @@ class SVGData extends Group {
 			styles.set("opacity", opacity);
 
 		}
+		if (inG.exists("stroke")) {
+
+			var stroke = inG.get("stroke");
+
+			if (styles == null)
+				styles = new StringMap<String>();
+
+			styles.set("stroke", stroke);
+
+		}
+		if (inG.exists("stroke-width")) {
+
+			var strokeWidth = inG.get("stroke-width");
+
+			if (styles == null)
+				styles = new StringMap<String>();
+
+			styles.set("stroke-width", strokeWidth);
+
+		}
+		if (inG.exists("fill")) {
+
+			var fill = inG.get("fill");
+
+			if (styles == null)
+				styles = new StringMap<String>();
+
+			styles.set("fill", fill);
+
+		}
 
 		for (el in inG.elements ()) {
 			

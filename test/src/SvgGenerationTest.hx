@@ -71,6 +71,11 @@ class SvgGenerationTest extends Test
         generateAndCompare("path-two-float-decimals.svg");
     }
     
+    public function testGroupInherited()
+    {
+        generateAndCompare("group-inherited.svg");
+    }
+    
     public function testFancySunIconRendersCorrectly()
     {
         generateAndCompare("fancy-sun.svg");
