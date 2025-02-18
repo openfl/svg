@@ -95,28 +95,34 @@ class PathParser {
                     var code =  ch<0 || ch>127 ? UNKNOWN :sCommandArgs[ch];
                     if (code>FLOAT )
                         break;
-                    if (code==FLOAT_DOT && seen_dot)
-                        break;
+                    if (code==FLOAT_DOT)
+                    {
+                        if (seen_dot) {
+                            // a second dot indicates the start of a new float
+                            break;
+                        }
+                        seen_dot = true;
+                    }
                     if (e_pos>=0)
                     {
                         if (code==FLOAT_SIGN)
                         {
-                        if (e_pos!=0)
-                            break;
+                            if (e_pos!=0)
+                                break;
                         }
                         else if (code!=FLOAT)
-                        break;
+                            break;
                         e_pos++;
                     }
                     else if (code==FLOAT_EXP)
                     {
                         if (e_pos>=0)
-                        break;
+                            break;
                         e_pos = 0;
                         seen_dot = true;
                     }
                     else if (code==FLOAT_SIGN)
-                    break;
+                        break;
                     end++;
                 }
                 if (current_command<0)

@@ -66,6 +66,11 @@ class SvgGenerationTest extends Test
         generateAndCompare("arc-radius-too-small.svg");
     }
     
+    public function testPathWithTwoFloatDecimals()
+    {
+        generateAndCompare("path-two-float-decimals.svg");
+    }
+    
     public function testFancySunIconRendersCorrectly()
     {
         generateAndCompare("fancy-sun.svg");
