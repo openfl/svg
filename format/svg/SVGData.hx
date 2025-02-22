@@ -490,7 +490,21 @@ class SVGData extends Group {
 			
 			grad.colors.push (getColorStyle ("stop-color", stop, styles, 0x000000));
 			grad.alphas.push (getFloatStyle ("stop-opacity", stop, styles, 1.0));
-			grad.ratios.push (Std.int (Std.parseFloat (stop.get ("offset")) * 255.0));
+			var percent = 0.0;
+			if (stop.exists("offset")) {
+				var offset = stop.get("offset");
+				if (offset.indexOf("%") != -1) {
+					// 0% - 100%
+					percent = Std.parseFloat (offset) / 100.0;
+				} else {
+					// 0.0 - 1.0
+					percent = Std.parseFloat(offset);
+				}
+				if (Math.isNaN(percent)) {
+					throw ("Unknown stop offset:" + offset);
+				}
+			}
+			grad.ratios.push (Std.int(percent * 255.0));
 			
 		}
 		
