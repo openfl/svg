@@ -34,7 +34,7 @@ class SVGData extends Group {
 	private static var mScaleMatch = ~/scale\((.*)\)/;
 	private static var mMatrixMatch = ~/matrix\((.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)\)/;
 	private static var mRotationMatch = ~/rotate\(([0-9\.]+)(\s+([0-9\.]+)\s*[, ]\s*([0-9\.]+))?\)/;
-	private static var mURLMatch = ~/url\(#(.*)\)/;
+	private static var mURLMatch = ~/url\(('|"?)#(.*)\1\)/;
 	private static var mRGBMatch = ~/rgb\s*\(\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*\)/;
 	private static var defaultFill = FillSolid(0x000000);
 	
@@ -246,7 +246,7 @@ class SVGData extends Group {
 		
 		if (mURLMatch.match (s)) {
 			
-			var url = mURLMatch.matched (1);
+			var url = mURLMatch.matched (2);
 			
 			if (mGrads.exists (url)) {
 				
