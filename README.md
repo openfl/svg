@@ -1,4 +1,4 @@
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.md) [![Haxelib Version](https://img.shields.io/github/tag/openfl/svg.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/svg) ![build status](https://api.travis-ci.org/openfl/svg.svg)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.md) [![Haxelib Version](https://img.shields.io/github/tag/openfl/svg.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/svg) [![Build Status](https://img.shields.io/github/actions/workflow/status/openfl/svg/main.yml?branch=master)](https://github.com/openfl/svg/actions)
 
 SVG
 ===
@@ -63,4 +63,4 @@ To return to release builds:
 Running SVG's Tests
 ===================
 
-`svg` includes some tests that render SVGs and make sure they look the way they're supposed to. These tests run automatically with each build/commit. To run them manually, run `haxe test.hxml`. For more information, check `README.md` in `test`.
+`svg` includes some tests that render SVGs and make sure they look the way they're supposed to. These tests run automatically with each build/commit. For more information about running them manually, see [test/README.md](test/README.md).

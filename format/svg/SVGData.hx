@@ -34,7 +34,7 @@ class SVGData extends Group {
 	private static var mScaleMatch = ~/scale\((.*)\)/;
 	private static var mMatrixMatch = ~/matrix\((.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)\)/;
 	private static var mRotationMatch = ~/rotate\((-?[0-9\.]+)[, ]?(\s*(-?[0-9\.]+)\s*[, ]\s*(-?[0-9\.]+))?\)/;
-	private static var mURLMatch = ~/url\(#(.*)\)/;
+	private static var mURLMatch = ~/url\(('|"?)#(.*)\1\)/;
 	private static var mRGBMatch = ~/rgb\s*\(\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*\)/;
 	private static var defaultFill = FillSolid(0x000000);
 	
@@ -62,21 +62,30 @@ class SVGData extends Group {
 		width = getFloatStyle ("width", svg, null, 0.0);
 		height = getFloatStyle ("height", svg, null, 0.0);
 		
-		if (width == 0 && height == 0)
-			width = height = 400;
-		else if (width == 0)
+		if (width == 0)
 			width = height;
 		else if (height == 0)
 			height = width;
 
-		var viewBox = new Rectangle(0, 0, width, height);
+		var viewBox:Rectangle;
 
-		if (svg.exists("viewBox")) {
-
+		if (svg.exists("viewBox")) 
+		{
 			var vbox = svg.get("viewBox");
 			var params = vbox.indexOf(",") != -1 ? vbox.split(",") : vbox.split(" ");
 			viewBox = new Rectangle( trimToFloat(params[0]), trimToFloat(params[1]), trimToFloat(params[2]), trimToFloat(params[3]) );
-
+		
+			if (width == 0 && height == 0)
+			{
+				width = viewBox.width;
+				height = viewBox.height;
+			}
+		}
+		else
+		{
+			if (width == 0 && height == 0)
+				width = height = 400;
+			viewBox = new Rectangle(0, 0, width, height);
 		}
 
 		loadGroup(this, svg, new Matrix (1, 0, 0, 1, -viewBox.x, -viewBox.y), null);
@@ -237,7 +246,7 @@ class SVGData extends Group {
 		
 		if (mURLMatch.match (s)) {
 			
-			var url = mURLMatch.matched (1);
+			var url = mURLMatch.matched (2);
 			
 			if (mGrads.exists (url)) {
 				
@@ -481,7 +490,21 @@ class SVGData extends Group {
 			
 			grad.colors.push (getColorStyle ("stop-color", stop, styles, 0x000000));
 			grad.alphas.push (getFloatStyle ("stop-opacity", stop, styles, 1.0));
-			grad.ratios.push (Std.int (Std.parseFloat (stop.get ("offset")) * 255.0));
+			var percent = 0.0;
+			if (stop.exists("offset")) {
+				var offset = stop.get("offset");
+				if (offset.indexOf("%") != -1) {
+					// 0% - 100%
+					percent = Std.parseFloat (offset) / 100.0;
+				} else {
+					// 0.0 - 1.0
+					percent = Std.parseFloat(offset);
+				}
+				if (Math.isNaN(percent)) {
+					throw ("Unknown stop offset:" + offset);
+				}
+			}
+			grad.ratios.push (Std.int(percent * 255.0));
 			
 		}
 		
@@ -531,6 +554,36 @@ class SVGData extends Group {
 				opacity = Std.string( Std.parseFloat(opacity) * Std.parseFloat(styles.get("opacity")) );
 			
 			styles.set("opacity", opacity);
+
+		}
+		if (inG.exists("stroke")) {
+
+			var stroke = inG.get("stroke");
+
+			if (styles == null)
+				styles = new StringMap<String>();
+
+			styles.set("stroke", stroke);
+
+		}
+		if (inG.exists("stroke-width")) {
+
+			var strokeWidth = inG.get("stroke-width");
+
+			if (styles == null)
+				styles = new StringMap<String>();
+
+			styles.set("stroke-width", strokeWidth);
+
+		}
+		if (inG.exists("fill")) {
+
+			var fill = inG.get("fill");
+
+			if (styles == null)
+				styles = new StringMap<String>();
+
+			styles.set("fill", fill);
 
 		}
 

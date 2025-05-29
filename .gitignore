@@ -4,3 +4,6 @@ build
 report
 *.html
 generated
+test/bin/
+docs/
+scripts/xml/
