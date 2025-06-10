@@ -30,10 +30,10 @@ class SVGData extends Group {
 	private static inline var TAN22:Float = 0.4142135623730950488016887242097;
 	private static var mStyleSplit = ~/;/g;
 	private static var mStyleValue = ~/\s*(.*)\s*:\s*(.*)\s*/;
-	private static var mTranslateMatch = ~/translate\((.*)[, ](.*)\)/;
-	private static var mScaleMatch = ~/scale\((.*)\)/;
-	private static var mMatrixMatch = ~/matrix\((.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)\)/;
-	private static var mRotationMatch = ~/rotate\((-?[0-9\.]+)(?:\s*,)?\s*(-?[0-9\.]+)?(?:\s*,)?\s*(-?[0-9\.]+)?\)/;
+	private static var mTranslateMatch = ~/translate\s*\((.*)[, ](.*)\)/;
+	private static var mScaleMatch = ~/scale\s*\((.*)\)/;
+	private static var mMatrixMatch = ~/matrix\s*\((.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)[, ]+(.*?)\)/;
+	private static var mRotationMatch = ~/rotate\s*\(\s*(-?[0-9\.]+)(?:\s*,)?\s*(-?[0-9\.]+)?(?:\s*,)?\s*(-?[0-9\.]+)?\s*\)/;
 	private static var mURLMatch = ~/url\(('|"?)#(.*)\1\)/;
 	private static var mRGBMatch = ~/rgb\s*\(\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*\)/;
 	private static var defaultFill = FillSolid(0x000000);
