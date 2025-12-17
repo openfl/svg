@@ -359,30 +359,21 @@ class SVGData extends Group {
 	
 	
 	private function getStyles (inNode:Xml, inPrevStyles:StringMap<String>):StringMap <String> {
-		
-		if (!inNode.exists ("style"))
-			return inPrevStyles;
 
-		var styles = new StringMap <String> ();
-		
-		if (inPrevStyles != null) {
-			
-			for (s in inPrevStyles.keys ()) {
-				
-				styles.set (s, inPrevStyles.get (s));
-			
-			}
-			
-		}
+		var styles = inPrevStyles != null ? inPrevStyles.copy() : new StringMap <String> ();
 
-		var style = inNode.get ("style");
-		var strings = mStyleSplit.split (style);
-		
-		for (s in strings) {
-		
-			if (mStyleValue.match (s)) {
-				
-				styles.set (mStyleValue.matched (1), mStyleValue.matched (2));
+		if (inNode.exists ("style")) {
+
+			var style = inNode.get ("style");
+			var strings = mStyleSplit.split (style);
+			
+			for (s in strings) {
+			
+				if (mStyleValue.match (s)) {
+					
+					styles.set (mStyleValue.matched (1), mStyleValue.matched (2));
+					
+				}
 				
 			}
 			
