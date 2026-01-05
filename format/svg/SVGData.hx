@@ -37,6 +37,7 @@ class SVGData extends Group {
 	private static var mURLMatch = ~/url\(('|"?)#(.*)\1\)/;
 	private static var mRGBMatch = ~/rgb\s*\(\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*,\s*(\d+)\s*(%)?\s*\)/;
 	private static var defaultFill = FillSolid(0x000000);
+	private static var tempMatrix = new Matrix();
 	
 	public var height (default, null):Float;
 	public var width (default, null):Float;
@@ -121,7 +122,7 @@ class SVGData extends Group {
 			
 		} else if (mMatrixMatch.match (inTrans)) {
 			
-			var m = new Matrix (
+			tempMatrix.setTo (
 				Std.parseFloat (mMatrixMatch.matched (1)),
 				Std.parseFloat (mMatrixMatch.matched (2)),
 				Std.parseFloat (mMatrixMatch.matched (3)),
@@ -130,14 +131,9 @@ class SVGData extends Group {
 				Std.parseFloat (mMatrixMatch.matched (6))
 			);
 			
-			m.concat (ioMatrix);
+			tempMatrix.concat (ioMatrix);
 			
-			ioMatrix.a = m.a;
-			ioMatrix.b = m.b;
-			ioMatrix.c = m.c;
-			ioMatrix.d = m.d;
-			ioMatrix.tx = m.tx;
-			ioMatrix.ty = m.ty;
+			ioMatrix.copyFrom (tempMatrix);
 			
 			scale = Math.sqrt (ioMatrix.a * ioMatrix.a + ioMatrix.c * ioMatrix.c);
         } else if (mRotationMatch.match (inTrans)) {
@@ -358,6 +354,21 @@ class SVGData extends Group {
 	}
 	
 	
+	private function getMatrix (inNode:Xml, inPrevMatrix:Matrix):Matrix {
+		
+		var matrix = inPrevMatrix != null ? inPrevMatrix.clone () : new Matrix ();
+		
+		if (inNode.exists ("transform")) {
+			
+			applyTransform (matrix, inNode.get ("transform"));
+			
+		}
+		
+		return matrix;
+		
+	}
+	
+	
 	private function getStyles (inNode:Xml, inPrevStyles:StringMap<String>):StringMap <String> {
 
 		var styles = inPrevStyles != null ? inPrevStyles.copy() : new StringMap <String> ();
@@ -504,14 +515,9 @@ class SVGData extends Group {
 	}
 	
 	
-	public function loadGroup (g:Group, inG:Xml, matrix:Matrix, inStyles:StringMap <String>):Group {
+	public function loadGroup (g:Group, inG:Xml, inMatrix:Matrix, inStyles:StringMap <String>):Group {
 		
-		if (inG.exists ("transform")) {
-			
-			matrix = matrix.clone ();
-			applyTransform (matrix, inG.get ("transform"));
-			
-		}
+		var matrix = getMatrix(inG, inMatrix);
 		
 		if (inG.exists ("inkscape:label")) {
 			
@@ -534,12 +540,10 @@ class SVGData extends Group {
 			</g>
 		</g>
 		*/
+		
 		if (inG.exists("opacity")) {
 
 			var opacity = inG.get("opacity");
-
-			if (styles == null)
-				styles = new StringMap<String>();
 
 			if (styles.exists("opacity"))
 				opacity = Std.string( Std.parseFloat(opacity) * Std.parseFloat(styles.get("opacity")) );
@@ -549,10 +553,7 @@ class SVGData extends Group {
 		}
 		if (inG.exists("stroke")) {
 
-			var stroke = inG.get("stroke");
-
-			if (styles == null)
-				styles = new StringMap<String>();
+			var stroke = inG.get("stroke");	
 
 			styles.set("stroke", stroke);
 
@@ -561,18 +562,12 @@ class SVGData extends Group {
 
 			var strokeWidth = inG.get("stroke-width");
 
-			if (styles == null)
-				styles = new StringMap<String>();
-
 			styles.set("stroke-width", strokeWidth);
 
 		}
 		if (inG.exists("fill")) {
 
 			var fill = inG.get("fill");
-
-			if (styles == null)
-				styles = new StringMap<String>();
 
 			styles.set("fill", fill);
 
@@ -647,14 +642,9 @@ class SVGData extends Group {
 	}
 	
 	
-	public function loadPath (inPath:Xml, matrix:Matrix, inStyles:StringMap<String>, inIsRect:Bool, inIsEllipse:Bool, inIsCircle:Bool=false):Path {
+	public function loadPath (inPath:Xml, inMatrix:Matrix, inStyles:StringMap<String>, inIsRect:Bool, inIsEllipse:Bool, inIsCircle:Bool=false):Path {
 		
-		if (inPath.exists ("transform")) {
-			
-			matrix = matrix.clone ();
-			applyTransform (matrix, inPath.get ("transform"));
-			
-		}
+		var matrix = getMatrix(inPath, inMatrix);
 		
 		var styles = getStyles (inPath, inStyles);
 		var name = inPath.exists ("id") ? inPath.get ("id") : "";
@@ -755,15 +745,9 @@ class SVGData extends Group {
 	}
 	
 	
-	public function loadText (inText:Xml, matrix:Matrix, inStyles:StringMap <String>):Text {
+	public function loadText (inText:Xml, inMatrix:Matrix, inStyles:StringMap <String>):Text {
 		
-		if (inText.exists ("transform")) {
-			
-			matrix = matrix.clone ();
-			applyTransform (matrix, inText.get ("transform"));
-			
-		}
-		
+		var matrix = getMatrix(inText, inMatrix);
 		var styles = getStyles (inText, inStyles);
 		var text = new Text ();
 		
