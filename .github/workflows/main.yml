@@ -6,8 +6,8 @@ jobs:
   package-haxelib:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/upload-artifact@v4
+      - uses: actions/checkout@v6
+      - uses: actions/upload-artifact@v6
         with:
           name: svg-haxelib
           path: |
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: krdlab/setup-haxe@v2
         with:
@@ -45,7 +45,7 @@ jobs:
         run: |
           haxe docs.hxml
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: svg-docs
           path: docs
@@ -57,7 +57,7 @@ jobs:
       SDL_VIDEODRIVER: "dummy"
       SDL_AUDIODRIVER: "disk"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: krdlab/setup-haxe@v2
         with:
@@ -86,7 +86,7 @@ jobs:
     # AL init fails on both windows and ubuntu
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: krdlab/setup-haxe@v2
         with:
