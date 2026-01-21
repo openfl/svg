@@ -10,7 +10,7 @@ class TestMain extends Sprite
 		super();
 
 		var runner = new Runner();
-		#if !(js && html5)
+		#if (!(js && html5) && !flash)
 		runner.addCase(new MacroTest());
 		#end
 		runner.addCase(new SvgGenerationTest());
