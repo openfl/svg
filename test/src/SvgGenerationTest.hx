@@ -35,7 +35,7 @@ class SvgGenerationTest extends Test
     // Percentage difference allowable between expected/actual images
     // Ranges from 0 to 1 (0.1 = 10% diff)
     // Currently at 15% because anti-aliasing artifacts on small images makes a big difference
-    private static inline var SVG_DIFF_TOLERANCE_PERCENT:Float = 0.10;
+    private static inline var SVG_DIFF_TOLERANCE_PERCENT:Float = 0.15;
     
     private var results:GenerationResults;
     
@@ -120,6 +120,11 @@ class SvgGenerationTest extends Test
     {
         generateAndCompareWithLayerFilter("layer_test1.svg", null, "disabled_test1.svg", null);
         generateAndCompareWithLayerFilter("layer_test1.svg", null, "disabled_test2.svg", null);
+    }
+
+    public function testTiger()
+    {
+        generateAndCompare("tiger.svg", 256, 256);
     }
 
     public function setupClass():Void {
