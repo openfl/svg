@@ -110,3 +110,34 @@ jobs:
         working-directory: test
         run: |
           haxelib run openfl test hl
+
+  unit-test-neko-openfl-develop:
+    runs-on: ubuntu-latest
+    env:
+      SDL_VIDEODRIVER: "dummy"
+      SDL_AUDIODRIVER: "disk"
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: krdlab/setup-haxe@v2
+        with:
+          haxe-version: 4.3.7
+
+      - name: Set HAXEPATH
+        run: |
+          echo "HAXEPATH=$HAXE_STD_PATH/.." >> $GITHUB_ENV
+
+      - name: Install Haxe dependencies
+        run: |
+          haxelib install lime --quiet
+          haxelib git openfl https://github.com/openfl/openfl --quiet
+          haxelib install utest --quiet
+
+      - name: Setup environment
+        run: |
+          haxelib dev svg ${{ github.workspace }}
+
+      - name: Run tests on Neko
+        working-directory: test
+        run: |
+          haxelib run openfl test neko
