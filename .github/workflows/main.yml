@@ -36,7 +36,7 @@ jobs:
       - name: Install Haxe dependencies
         run: |
           haxelib install lime --quiet
-          haxelib install openfl --quiet
+          haxelib install openfl 9.5.0 --quiet
           haxelib install dox --quiet
           haxelib dev svg ${{ github.workspace }}
 
@@ -70,7 +70,7 @@ jobs:
       - name: Install Haxe dependencies
         run: |
           haxelib install lime --quiet
-          haxelib install openfl --quiet
+          haxelib install openfl 9.5.0 --quiet
           haxelib install utest --quiet
 
       - name: Setup environment
@@ -99,7 +99,7 @@ jobs:
       - name: Install Haxe dependencies
         run: |
           haxelib install lime --quiet
-          haxelib install openfl --quiet
+          haxelib install openfl 9.5.0 --quiet
           haxelib install utest --quiet
 
       - name: Setup environment
