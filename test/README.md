@@ -5,7 +5,7 @@
 To run the tests, run of the following commands.
 
 - Windows: `openfl test windows`
-- macOS: `openfl test windows`
+- macOS: `openfl test mac`
 - Linux: `openfl test linux`
 - Neko: `openfl test neko`
 - HashLink: `openfl test hl`
