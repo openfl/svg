@@ -30,14 +30,6 @@ class GfxGraphics extends Gfx
 
    override public function lineStyle(style:LineStyle)
    {
-      if (style.thickness <= 0.0)
-      {
-         // in the SVG specification, a stroke with a thickness of 0 is not
-         // rendered. however, when the thickness is 0 in OpenFL, it would draw
-         // a "hairline" stroke instead, so don't pass 0 to lineStyle().
-         graphics.lineStyle();
-         return;
-      }
       graphics.lineStyle(style.thickness,style.color,style.alpha,style.pixelHinting,style.scaleMode,style.capsStyle,style.jointStyle,style.miterLimit);
    }
    override public function endLineStyle() { graphics.lineStyle(); }
