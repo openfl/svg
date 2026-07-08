@@ -128,7 +128,7 @@ class SVGRenderer
             }
 
 
-            if (inPath.stroke_colour==null)
+            if (inPath.stroke_colour==null || inPath.stroke_width <= 0.0)
             {
                 //mGfx.lineStyle();
             }
