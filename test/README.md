@@ -4,11 +4,11 @@
 
 To run the tests, run of the following commands.
 
-- Windows: `openfl test windows`
-- macOS: `openfl test mac`
-- Linux: `openfl test linux`
-- Neko: `openfl test neko`
-- HashLink: `openfl test hl`
+- Windows: `lime test windows`
+- macOS: `lime test mac`
+- Linux: `lime test linux`
+- Neko: `lime test neko`
+- HashLink: `lime test hl`
 
 On Haxe `sys` targets, this generates an `svg-tests.html` file in the repository root, which shows a row per image. For each row, it displays:
 
